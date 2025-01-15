@@ -39,6 +39,9 @@ kotlin {
 
             implementation(libs.bundles.ktor)
             implementation(libs.ktor.client.okhttp)
+
+            api(libs.bundles.datastore)
+            api(libs.bundles.kodein)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
