@@ -42,6 +42,7 @@ kotlin {
 
             api(libs.bundles.datastore)
             api(libs.bundles.kodein)
+            implementation(libs.bundles.voyager)
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
