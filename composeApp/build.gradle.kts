@@ -26,6 +26,9 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+
+            implementation(libs.koin.android)
+            implementation(libs.koin.android.compat)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -41,7 +44,7 @@ kotlin {
             implementation(libs.ktor.client.okhttp)
 
             api(libs.bundles.datastore)
-            api(libs.bundles.kodein)
+            api(libs.bundles.koin)
             implementation(libs.bundles.voyager)
         }
         desktopMain.dependencies {
