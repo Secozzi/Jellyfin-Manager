@@ -5,7 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 
 class DataStorePreferenceStore(
     private val dataStore: DataStore<Preferences>
-):PreferenceStore {
+): PreferenceStore {
     override fun getString(key: String, defaultValue: String): Preference<String> {
         return StringPrimitive(dataStore, key, defaultValue)
     }
@@ -32,5 +32,20 @@ class DataStorePreferenceStore(
 
     override fun getByteArray(key: String, defaultValue: ByteArray): Preference<ByteArray> {
         return ByteArrayPrimitive(dataStore, key, defaultValue)
+    }
+
+    override fun <T> getObject(
+        key: String,
+        defaultValue: T,
+        serializer: (T) -> String,
+        deserializer: (String) -> T,
+    ): Preference<T> {
+        return Object(
+            dataStore,
+            key,
+            defaultValue,
+            serializer,
+            deserializer
+        )
     }
 }
