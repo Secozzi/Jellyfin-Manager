@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.dp
  *
  * @constructor Creates a new instance of [FabButtonItem].
  */
-data class FabButtonItem(val iconRes: ImageVector, val label: String)
+data class FabButtonItem(val iconRes: ImageVector, val label: String, val key: String)
 
 /**
  * Represents the state of a Floating Action Button (FAB), which can be either Collapsed or Expanded.

@@ -14,7 +14,7 @@ import xyz.secozzi.jellyfinmanager.preferences.BasePreferences
 import xyz.secozzi.jellyfinmanager.preferences.preference.collectAsState
 import xyz.secozzi.jellyfinmanager.presentation.theme.DarkMode
 
-fun main() = application {
+fun main() {
     startKoin {
         modules(
             initKoin(
@@ -23,24 +23,26 @@ fun main() = application {
         )
     }
 
-    Window(
-        onCloseRequest = ::exitApplication,
-        title = "Jellyfin Manager",
-    ) {
-        val preferences = koinInject<BasePreferences>()
-        val darkMode by preferences.darkMode.collectAsState()
+    application {
+        Window(
+            onCloseRequest = ::exitApplication,
+            title = "Jellyfin Manager",
+        ) {
+            val preferences = koinInject<BasePreferences>()
+            val darkMode by preferences.darkMode.collectAsState()
 
-        val isDarkTheme = when (darkMode) {
-            DarkMode.Light -> false
-            DarkMode.Dark -> true
-            DarkMode.System -> isSystemInDarkTheme()
+            val isDarkTheme = when (darkMode) {
+                DarkMode.Light -> false
+                DarkMode.Dark -> true
+                DarkMode.System -> isSystemInDarkTheme()
+            }
+
+            WindowStyle(
+                isDarkTheme = isDarkTheme,
+                backdropType = WindowBackdrop.Mica,
+            )
+
+            App()
         }
-
-        WindowStyle(
-            isDarkTheme = isDarkTheme,
-            backdropType = WindowBackdrop.Mica,
-        )
-
-        App()
     }
 }

@@ -81,3 +81,11 @@ sealed class RequestState<out T> {
         }
     }
 }
+
+fun <T> Result<T>.toRequestState(): RequestState<T> {
+    return if (this.isSuccess) {
+        RequestState.Success(this.getOrThrow())
+    } else {
+        RequestState.Error(this.exceptionOrNull() ?: Exception("error"))
+    }
+}

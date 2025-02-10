@@ -56,9 +56,14 @@ import kotlinx.coroutines.launch
 import xyz.secozzi.jellyfinmanager.presentation.ErrorScreenContent
 import xyz.secozzi.jellyfinmanager.presentation.FabButtonItem
 import xyz.secozzi.jellyfinmanager.presentation.FabButtonMain
+import xyz.secozzi.jellyfinmanager.presentation.FabButtonState
 import xyz.secozzi.jellyfinmanager.presentation.LoadingScreenContent
 import xyz.secozzi.jellyfinmanager.presentation.MaterialPullRefreshIndicator
 import xyz.secozzi.jellyfinmanager.presentation.MultiFloatingActionButton
+import xyz.secozzi.jellyfinmanager.presentation.components.ConfirmDialog
+import xyz.secozzi.jellyfinmanager.presentation.components.Dialogs
+import xyz.secozzi.jellyfinmanager.presentation.components.EditTextDialog
+import xyz.secozzi.jellyfinmanager.presentation.rememberMultiFabState
 import xyz.secozzi.jellyfinmanager.presentation.utils.Tab
 import xyz.secozzi.jellyfinmanager.ui.preferences.PreferencesScreen
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
@@ -88,6 +93,9 @@ object SSHTab : Tab {
         val currentDir by screenModel.currentDir.collectAsState()
 
         val state by screenModel.state.collectAsState()
+        val dialogShown by screenModel.dialogShown.collectAsState()
+        val isExecutingCommand by screenModel.executingCommand.collectAsState()
+
         var isRefreshing by remember { mutableStateOf(false) }
         val ptrState = rememberPullRefreshState(
             refreshing = isRefreshing,
@@ -107,11 +115,11 @@ object SSHTab : Tab {
                     title = { Text(currentDir, maxLines = 2) },
                     actions = {
                         if (platform == Platform.Desktop) {
-                            IconButton(onClick = {}) {
+                            IconButton(onClick = { screenModel.setDialog(Dialogs.EditText) }) {
                                 Icon(Icons.Default.CreateNewFolder, null)
                             }
 
-                            IconButton(onClick = {}) {
+                            IconButton(onClick = { screenModel.setDialog(Dialogs.Confirm) }) {
                                 Icon(Icons.Default.Delete, null)
                             }
 
@@ -132,18 +140,32 @@ object SSHTab : Tab {
             },
             floatingActionButton = {
                 if (platform == Platform.Android) {
+
+                    val fabState = rememberMultiFabState()
+
                     MultiFloatingActionButton(
                         items = listOf(
                             FabButtonItem(
                                 iconRes = Icons.Default.CreateNewFolder,
                                 label = "New folder",
+                                key = "add",
                             ),
                             FabButtonItem(
                                 iconRes = Icons.Default.Delete,
                                 label = "Delete current",
+                                key = "delete"
                             ),
                         ),
-                        onFabItemClicked = {},
+                        fabState = fabState,
+                        onFabItemClicked = { btn ->
+                            fabState.value = FabButtonState.Collapsed
+
+                            when (btn.key) {
+                                "add" -> screenModel.setDialog(Dialogs.EditText)
+                                "delete" -> screenModel.setDialog(Dialogs.Confirm)
+                                else -> {}
+                            }
+                        },
                         fabIcon = FabButtonMain(
                             iconRes = Icons.Default.Edit,
                             iconRotate = 90f,
@@ -157,10 +179,10 @@ object SSHTab : Tab {
                     .fillMaxSize()
                     .padding(paddingValues),
                 onLoading = {
-                    LoadingScreenContent()
+                    LoadingScreenContent(modifier = Modifier.fillMaxSize())
                 },
                 onIdle = {
-                    LoadingScreenContent()
+                    LoadingScreenContent(modifier = Modifier.fillMaxSize())
                 },
                 onError = {
                     ErrorScreenContent(it) {
@@ -201,6 +223,31 @@ object SSHTab : Tab {
                                 )
                             }
                         }
+                    }
+
+                    when (dialogShown) {
+                        Dialogs.Confirm -> {
+                            ConfirmDialog(
+                                title = "Delete",
+                                isLoading = isExecutingCommand,
+                                subtitle = "Are you sure you want to delete '${currentDir}'?",
+                                onConfirm = {
+                                    screenModel.removeDirectory()
+                                },
+                                onCancel = { screenModel.cancelCommand() },
+                            )
+                        }
+                        Dialogs.EditText -> {
+                            EditTextDialog(
+                                title = "Create new directory",
+                                isLoading = isExecutingCommand,
+                                onConfirm = { newPath ->
+                                    screenModel.createDirectory(newPath)
+                                },
+                                onCancel = { screenModel.cancelCommand() }
+                            )
+                        }
+                        null -> {}
                     }
                 }
             )
