@@ -9,6 +9,7 @@ androidx-lifecycle = "2.8.4"
 compose-multiplatform = "1.7.0"
 kotlin = "2.1.0"
 kotlinx-coroutines = "1.10.1"
+immutable-collections = "0.3.8"
 
 ktor = "3.0.3"
 datastore = "1.1.2"
@@ -16,6 +17,11 @@ koin = "4.0.0"
 voyager = "1.1.0-beta03"
 compose-settings = "2.6.0"
 compose-window = "0.3.3-SNAPSHOT"
+sshj = "0.38.0"
+sonner = "0.3.8"
+ptr = "1.4.0-beta03"
+materialmotion = "2.0.1"
+conscrypt-android = "2.5.3"
 
 [libraries]
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3-android" }
@@ -24,7 +30,7 @@ androidx-activity-compose = { module = "androidx.activity:activity-compose", ver
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }
 kotlinx-coroutines-swing = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-swing", version.ref = "kotlinx-coroutines" }
-immutable-collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.3.8" }
+immutable-collections = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version.ref = "immutable-collections" }
 
 ktor-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
@@ -43,18 +49,28 @@ koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-android-compat = { module = "io.insert-koin:koin-android-compat", version.ref = "koin" }
 
 voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
+voyager-screenmodel = { module = "cafe.adriel.voyager:voyager-screenmodel", version.ref = "voyager" }
+voyager-koin = { module = "cafe.adriel.voyager:voyager-koin", version.ref = "voyager" }
 voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
+voyager-tab = { module = "cafe.adriel.voyager:voyager-tab-navigator", version.ref = "voyager" }
 
 compose-settings = { module = "com.github.alorma.compose-settings:ui-tiles", version.ref = "compose-settings" }
 compose-settings-extended = { module = "com.github.alorma.compose-settings:ui-tiles-extended", version.ref = "compose-settings" }
-
 compose-window = { module = "com.mayakapps.compose:window-styler", version.ref = "compose-window" }
+compose-materialmotion = { module = "io.github.fornewid:material-motion-compose-core", version.ref = "materialmotion" }
+
+sshj = { module = "com.hierynomus:sshj", version.ref = "sshj" }
+conscrypt-android = { module = "org.conscrypt:conscrypt-android", version.ref = "conscrypt-android" }
+
+sonner = { module = "io.github.dokar3:sonner", version.ref = "sonner" }
+
+ptr = { module = "dev.materii.pullrefresh:pullrefresh", version.ref = "ptr" }
 
 [bundles]
 ktor = ["ktor-core", "ktor-logging", "ktor-content-negotiation", "ktor-serialization-kotlinx-json"]
 koin = ["koin-compose", "koin-core", "koin-compose-viewmodel", "koin-core-viewmodel"]
 datastore = ["datastore-core", "datastore-preferences"]
-voyager = ["voyager-navigator", "voyager-transitions"]
+voyager = ["voyager-navigator", "voyager-screenmodel", "voyager-koin", "voyager-transitions", "voyager-tab"]
 compose-settings = ["compose-settings", "compose-settings-extended"]
 
 [plugins]

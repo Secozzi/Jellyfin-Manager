@@ -7,5 +7,6 @@ fun initKoin(
 ) = module {
     includes(
         PreferencesModule(datastorePath),
+        ScreenModelsModule,
     )
 }

@@ -2,6 +2,7 @@ package xyz.secozzi.jellyfinmanager
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.mayakapps.compose.windowstyler.WindowBackdrop

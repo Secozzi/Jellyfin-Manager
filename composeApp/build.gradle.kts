@@ -31,6 +31,7 @@ kotlin {
 
             implementation(libs.koin.android)
             implementation(libs.koin.android.compat)
+            implementation(libs.conscrypt.android)
         }
 
         commonMain.dependencies {
@@ -48,6 +49,10 @@ kotlin {
             implementation(libs.bundles.ktor)
             // implementation(libs.ktor.client.okhttp)
             implementation(libs.bundles.compose.settings)
+            implementation(libs.compose.materialmotion)
+            implementation(libs.sshj)
+            implementation(libs.sonner)
+            implementation(libs.ptr)
 
             api(libs.bundles.datastore)
             api(libs.bundles.koin)
@@ -63,6 +68,10 @@ kotlin {
 
             implementation(libs.compose.window)
         }
+    }
+
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
     }
 }
 
