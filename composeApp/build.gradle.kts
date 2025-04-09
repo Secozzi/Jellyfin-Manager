@@ -29,21 +29,41 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.material3.android)
+            implementation(libs.androidx.material3)
+
+            implementation(libs.koin.android)
+            implementation(libs.koin.android.compat)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
-            implementation(compose.material)
+            implementation(compose.material3)
+            implementation(compose.materialIconsExtended)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
+            implementation(libs.immutable.collections)
+
+            implementation(libs.bundles.voyager)
+            implementation(libs.compose.materialmotion)
+            implementation(libs.bundles.compose.settings)
+
+            api(libs.bundles.datastore)
+            api(libs.bundles.koin)
         }
         desktopMain.dependencies {
-            implementation(compose.desktop.currentOs)
+            implementation(compose.desktop.currentOs) {
+                exclude("org.jetbrains.compose.material")
+            }
             implementation(libs.kotlinx.coroutines.swing)
         }
+    }
+
+    compilerOptions {
+        freeCompilerArgs.add("-Xopt-in=androidx.compose.material3.ExperimentalMaterial3Api")
     }
 }
 
