@@ -1,6 +1,5 @@
 import com.codingfeline.buildkonfig.compiler.FieldSpec.Type
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -8,14 +7,16 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlin.parcelize)
+    alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.buildkonfig)
+    alias(libs.plugins.sqldelight)
 }
 
 private val versionStr = "0.1.0"
 
 kotlin {
     androidTarget {
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_21)
         }
@@ -32,6 +33,7 @@ kotlin {
             implementation(libs.androidx.material3.android)
             implementation(libs.androidx.material3)
 
+            implementation(libs.sqldelight.android)
             implementation(libs.koin.android)
             implementation(libs.koin.android.compat)
         }
@@ -45,16 +47,20 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
+            implementation(libs.serialization.json)
             implementation(libs.immutable.collections)
 
             implementation(libs.bundles.voyager)
             implementation(libs.compose.materialmotion)
             implementation(libs.bundles.compose.settings)
+            implementation(libs.sqldelight.coroutines)
+            implementation(libs.sonner)
 
             api(libs.bundles.datastore)
             api(libs.bundles.koin)
         }
         desktopMain.dependencies {
+            implementation(libs.sqldelight.desktop)
             implementation(compose.desktop.currentOs) {
                 exclude("org.jetbrains.compose.material")
             }
@@ -63,7 +69,10 @@ kotlin {
     }
 
     compilerOptions {
-        freeCompilerArgs.add("-Xopt-in=androidx.compose.material3.ExperimentalMaterial3Api")
+        freeCompilerArgs.addAll(
+            "-Xexpect-actual-classes",
+            "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
+        )
     }
 }
 
@@ -86,11 +95,23 @@ android {
     buildTypes {
         getByName("release") {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21
+    }
+}
+
+sqldelight {
+    databases {
+        create("JMDatabase") {
+            packageName.set("xyz.secozzi.jellyfinmanager.domain.db")
+            schemaOutputDirectory = file("src/commonMain/sqldelight/databases")
+            verifyMigrations = true
+            verifyDefinitions = true
+        }
     }
 }
 

@@ -6,4 +6,8 @@ plugins {
     alias(libs.plugins.composeMultiplatform) apply false
     alias(libs.plugins.composeCompiler) apply false
     alias(libs.plugins.kotlinMultiplatform) apply false
+    alias(libs.plugins.kotlin.parcelize) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.buildkonfig) apply false
+    alias(libs.plugins.sqldelight) apply false
 }

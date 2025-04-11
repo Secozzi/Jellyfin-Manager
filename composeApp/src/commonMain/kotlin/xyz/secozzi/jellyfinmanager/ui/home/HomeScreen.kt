@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Settings
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -21,22 +20,31 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.util.fastForEach
+import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.TabNavigator
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
 import soup.compose.material.motion.animation.materialFadeThroughIn
 import soup.compose.material.motion.animation.materialFadeThroughOut
 import xyz.secozzi.jellyfinmanager.presentation.utils.Screen
 import xyz.secozzi.jellyfinmanager.presentation.utils.Tab
+import xyz.secozzi.jellyfinmanager.ui.home.components.DropDown
+import xyz.secozzi.jellyfinmanager.ui.home.components.NoServerContent
 import xyz.secozzi.jellyfinmanager.ui.home.tabs.jellyfin.JellyfinTab
 import xyz.secozzi.jellyfinmanager.ui.home.tabs.ssh.SSHTab
 import xyz.secozzi.jellyfinmanager.ui.preferences.PreferencesScreen
+import xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.server.ServerScreen
 
 object HomeScreen : Screen() {
     private fun readResolve(): Any = HomeScreen
@@ -44,22 +52,24 @@ object HomeScreen : Screen() {
     private const val TAB_FADE_DURATION = 200
     private const val TAB_NAVIGATOR_KEY = "HomeTabs"
 
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
-        val tabs = listOf(
-            SSHTab,
-            JellyfinTab,
-        )
-
         val navigator = LocalNavigator.currentOrThrow
+
+        val screenModel = koinScreenModel<HomeScreenScreenModel>()
+        val serverList by screenModel.serverList.collectAsState()
+        val selectedServer by screenModel.selectedServer.collectAsState()
 
         Scaffold(
             topBar = {
                 TopAppBar(
                     title = {
-                        OutlinedButton(onClick = {}) {
-                            Text("Select server")
+                        if (selectedServer != null) {
+                            DropDown(
+                                server = selectedServer!!,
+                                values = serverList.toPersistentList(),
+                                onSelect = screenModel::selectServer,
+                            )
                         }
                     },
                     actions = {
@@ -71,40 +81,66 @@ object HomeScreen : Screen() {
             },
             contentWindowInsets = WindowInsets(0),
         ) { contentPadding ->
-            TabNavigator(
-                tab = tabs.first(),
-                key = TAB_NAVIGATOR_KEY,
-            ) { tabNavigator ->
-                Scaffold(
-                    modifier = Modifier.padding(contentPadding),
-                    bottomBar = {
-                        NavigationBar {
-                            tabs.fastForEach {
-                                NavigationBarItem(it)
-                            }
+            if (serverList.isEmpty()) {
+                NoServerContent(
+                    onClick = { navigator.push(ServerScreen(null)) },
+                )
+                return@Scaffold
+            }
+
+            val serverData = selectedServer
+                ?: throw IllegalArgumentException("No server selected")
+
+            val tabs = listOf(
+                SSHTab(serverData),
+                JellyfinTab(serverData),
+            )
+
+            ServerContent(
+                tabs = tabs,
+                modifier = Modifier.padding(contentPadding)
+            )
+        }
+    }
+
+    @Composable
+    private fun ServerContent(
+        tabs: List<Tab>,
+        modifier: Modifier = Modifier,
+    ) {
+        TabNavigator(
+            tab = tabs.first(),
+            key = TAB_NAVIGATOR_KEY,
+        ) { tabNavigator ->
+            Scaffold(
+                modifier = modifier,
+                bottomBar = {
+                    NavigationBar {
+                        tabs.fastForEach {
+                            NavigationBarItem(it)
                         }
-                    },
-                    contentWindowInsets = WindowInsets(0),
-                ) { contentPadding ->
-                    Box(
-                        modifier = Modifier
-                            .padding(contentPadding)
-                            .consumeWindowInsets(contentPadding),
+                    }
+                },
+                contentWindowInsets = WindowInsets(0),
+            ) { contentPadding ->
+                Box(
+                    modifier = Modifier
+                        .padding(contentPadding)
+                        .consumeWindowInsets(contentPadding),
+                ) {
+                    AnimatedContent(
+                        targetState = tabNavigator.current,
+                        transitionSpec = {
+                            materialFadeThroughIn(
+                                initialScale = 1f,
+                                durationMillis = TAB_FADE_DURATION,
+                            ) togetherWith
+                                    materialFadeThroughOut(durationMillis = TAB_FADE_DURATION)
+                        },
+                        label = "tabContent",
                     ) {
-                        AnimatedContent(
-                            targetState = tabNavigator.current,
-                            transitionSpec = {
-                                materialFadeThroughIn(
-                                    initialScale = 1f,
-                                    durationMillis = TAB_FADE_DURATION,
-                                ) togetherWith
-                                        materialFadeThroughOut(durationMillis = TAB_FADE_DURATION)
-                            },
-                            label = "tabContent",
-                        ) {
-                            tabNavigator.saveableState(key = "currentTab", it) {
-                                it.Content()
-                            }
+                        tabNavigator.saveableState(key = "currentTab", it) {
+                            it.Content()
                         }
                     }
                 }
@@ -118,6 +154,7 @@ object HomeScreen : Screen() {
         val navigator = LocalNavigator.currentOrThrow
         val scope = rememberCoroutineScope()
         val selected = tabNavigator.current::class == tab::class
+
         NavigationBarItem(
             selected = selected,
             onClick = {

@@ -7,7 +7,6 @@ import xyz.secozzi.jellyfinmanager.presentation.theme.DarkMode
 class BasePreferences(
     preferences: PreferenceStore
 ) {
-    val dbKey = preferences.getString("db_key", "")
     val darkMode = preferences.getEnum("dark_mode", DarkMode.Dark)
     val materialYou = preferences.getBoolean("material_you")
 }

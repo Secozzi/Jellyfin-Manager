@@ -1,0 +1,74 @@
+CREATE TABLE IF NOT EXISTS ServerTable(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    `index` INTEGER NOT NULL,
+    sshAddress TEXT NOT NULL,
+    sshPort INTEGER NOT NULL,
+    sshHostname TEXT NOT NULL,
+    sshPassword TEXT NOT NULL,
+    sshPrivateKey TEXT NOT NULL,
+    sshBaseDir TEXT NOT NULL,
+    sshBaseDirBlacklist TEXT NOT NULL,
+    jfAddress TEXT NOT NULL,
+    jfUsername TEXT NOT NULL,
+    jfPassword TEXT NOT NULL
+);
+
+insert:
+INSERT INTO ServerTable(
+    name,
+    `index`,
+    sshAddress,
+    sshPort,
+    sshHostname,
+    sshPassword,
+    sshPrivateKey,
+    sshBaseDir,
+    sshBaseDirBlacklist,
+    jfAddress,
+    jfUsername,
+    jfPassword
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+update:
+INSERT OR REPLACE INTO ServerTable(
+    id,
+    name,
+    `index`,
+    sshAddress,
+    sshPort,
+    sshHostname,
+    sshPassword,
+    sshPrivateKey,
+    sshBaseDir,
+    sshBaseDirBlacklist,
+    jfAddress,
+    jfUsername,
+    jfPassword
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+delete:
+DELETE FROM ServerTable WHERE id = :id;
+
+getServers:
+SELECT * FROM ServerTable
+ORDER BY `index`;
+
+getNextServer:
+SELECT * FROM ServerTable
+WHERE `index` > :currentIndex
+ORDER BY `index` ASC
+LIMIT 1;
+
+getPreviousServer:
+SELECT * FROM ServerTable
+WHERE `index` < :currentIndex
+ORDER BY `index` DESC
+LIMIT 1;
+
+getServersAfter:
+SELECT * FROM ServerTable
+WHERE `index` > :index;
+
+getServerCount:
+SELECT COUNT(*) FROM ServerTable;

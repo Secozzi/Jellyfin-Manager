@@ -48,11 +48,11 @@ object AppearancePreferencesScreen : Screen() {
                     }
                 )
             }
-        ) { paddingValues ->
+        ) { contentPadding ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)
+                    .padding(contentPadding)
             ) {
                 val darkMode by preferences.darkMode.collectAsState()
                 MultiChoiceSegmentedButtonsPreference(
