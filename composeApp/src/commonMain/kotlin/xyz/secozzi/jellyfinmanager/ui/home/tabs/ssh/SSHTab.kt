@@ -4,16 +4,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import cafe.adriel.voyager.koin.koinScreenModel
 import cafe.adriel.voyager.navigator.tab.TabOptions
-import org.koin.core.parameter.parametersOf
-import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.presentation.utils.Tab
+import xyz.secozzi.jellyfinmanager.ui.home.HomeScreenScreenModel
 
-data class SSHTab(
-    private val server: Server,
-) : Tab {
+object SSHTab : Tab {
+    private fun readResolve(): Any = SSHTab
+
     override val options: TabOptions
         @Composable
         get() {
@@ -27,10 +29,17 @@ data class SSHTab(
 
     @Composable
     override fun Content() {
-        val screenModel = koinScreenModel<SSHTabScreenModel>(
-            parameters = { parametersOf(server) }
-        )
+        val homeScreenModel = koinScreenModel<HomeScreenScreenModel>()
+        val screenModel = koinScreenModel<SSHTabScreenModel>()
 
-        Text("SSH")
+        LaunchedEffect(Unit) {
+            homeScreenModel.selectedServer.collect {
+                screenModel.changeServer(it)
+            }
+        }
+
+        val selectedServer by screenModel.selectedServer.collectAsState()
+
+        Text("SSH: " + (selectedServer?.name ?: "Waiting"))
     }
 }
