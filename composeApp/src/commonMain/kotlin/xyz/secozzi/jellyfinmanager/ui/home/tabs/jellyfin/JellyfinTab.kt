@@ -32,11 +32,12 @@ object JellyfinTab: Tab {
     @Composable
     override fun Content() {
         val homeScreenModel = koinScreenModel<HomeScreenScreenModel>()
-        val screenModel = koinScreenModel<SSHTabScreenModel>()
+        val screenModel = koinScreenModel<JellyfinTabScreenModel>()
 
         LaunchedEffect(Unit) {
-            homeScreenModel.selectedServer.collect {
-                screenModel.changeServer(it)
+            homeScreenModel.state.collect { selected ->
+                selected.getSuccessDataOrNull()
+                    ?.let(screenModel::changeServer)
             }
         }
 

@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Settings
@@ -36,6 +37,9 @@ import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.launch
 import soup.compose.material.motion.animation.materialFadeThroughIn
 import soup.compose.material.motion.animation.materialFadeThroughOut
+import xyz.secozzi.jellyfinmanager.domain.database.models.Server
+import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreenContent
+import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
 import xyz.secozzi.jellyfinmanager.presentation.utils.Screen
 import xyz.secozzi.jellyfinmanager.presentation.utils.Tab
 import xyz.secozzi.jellyfinmanager.ui.home.components.DropDown
@@ -57,7 +61,7 @@ object HomeScreen : Screen() {
 
         val screenModel = koinScreenModel<HomeScreenScreenModel>()
         val serverList by screenModel.serverList.collectAsState()
-        val selectedServer by screenModel.selectedServer.collectAsState()
+        val state by screenModel.state.collectAsState()
 
         val tabs = persistentListOf(
             SSHTab,
@@ -68,9 +72,9 @@ object HomeScreen : Screen() {
             topBar = {
                 TopAppBar(
                     title = {
-                        if (selectedServer != null) {
+                        state.getSuccessDataOrNull()?.let { selected ->
                             DropDown(
-                                server = selectedServer!!,
+                                server = selected,
                                 values = serverList.toPersistentList(),
                                 onSelect = screenModel::selectServer,
                             )
@@ -85,14 +89,9 @@ object HomeScreen : Screen() {
             },
             contentWindowInsets = WindowInsets(0),
         ) { contentPadding ->
-            if (serverList.isEmpty()) {
-                NoServerContent(
-                    onClick = { navigator.push(ServerScreen(null)) },
-                )
-                return@Scaffold
-            }
-
             ServerContent(
+                state = state,
+                serverList = serverList,
                 tabs = tabs,
                 modifier = Modifier.padding(contentPadding)
             )
@@ -101,9 +100,13 @@ object HomeScreen : Screen() {
 
     @Composable
     private fun ServerContent(
+        state: RequestState<Server?>,
+        serverList: List<Server>,
         tabs: ImmutableList<Tab>,
         modifier: Modifier = Modifier,
     ) {
+        val navigator = LocalNavigator.currentOrThrow
+
         TabNavigator(
             tab = tabs.first(),
             key = TAB_NAVIGATOR_KEY,
@@ -136,6 +139,18 @@ object HomeScreen : Screen() {
                         label = "tabContent",
                     ) {
                         tabNavigator.saveableState(key = "currentTab", it) {
+                            if (state.isIdle() || state.isLoading()) {
+                                LoadingScreenContent()
+                                return@saveableState
+                            }
+
+                            if (serverList.isEmpty()) {
+                                NoServerContent(
+                                    onClick = { navigator.push(ServerScreen(null)) },
+                                )
+                                return@saveableState
+                            }
+
                             it.Content()
                         }
                     }

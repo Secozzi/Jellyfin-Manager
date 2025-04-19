@@ -237,6 +237,8 @@ private fun JellyfinSection(
             label = "Password",
             required = false,
             onValueChange = onJfPasswordChange,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            isPassword = true,
         )
     }
 }
@@ -284,6 +286,8 @@ private fun SSHSection(
             label = "Password",
             required = false,
             onValueChange = onSSHPasswordChange,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            isPassword = true,
         )
 
         ServerTextField(
@@ -291,6 +295,8 @@ private fun SSHSection(
             label = "Private key",
             required = false,
             onValueChange = onSSHPrivateKeyChange,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            isPassword = true,
         )
 
         ServerTextField(

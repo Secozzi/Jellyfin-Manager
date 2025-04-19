@@ -32,6 +32,8 @@ kotlin {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.material3.android)
             implementation(libs.androidx.material3)
+            implementation(libs.bouncycastle)
+            implementation(libs.sqlcipher.android)
 
             implementation(libs.sqldelight.android)
             implementation(libs.koin.android)
@@ -51,16 +53,20 @@ kotlin {
             implementation(libs.immutable.collections)
 
             implementation(libs.bundles.voyager)
+            implementation(libs.compose.backhandler)
             implementation(libs.compose.materialmotion)
             implementation(libs.bundles.compose.settings)
             implementation(libs.sqldelight.coroutines)
-            implementation(libs.sonner)
+            implementation(libs.sshj)
+            implementation(libs.compose.ptr)
 
             api(libs.bundles.datastore)
             api(libs.bundles.koin)
         }
         desktopMain.dependencies {
             implementation(libs.sqldelight.desktop)
+            implementation(libs.willena.sqlite.jdbc)
+
             implementation(compose.desktop.currentOs) {
                 exclude("org.jetbrains.compose.material")
             }
@@ -90,6 +96,7 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "META-INF/**/*.MF"
         }
     }
     buildTypes {

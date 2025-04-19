@@ -61,7 +61,7 @@ class ServerScreenModel(
     }
 
     fun onSSHPortChange(value: String) {
-        _server.update { s -> s.copy(sshPort = value.toLong()) }
+        _server.update { s -> s.copy(sshPort = value.toLongOrNull() ?: 0L) }
     }
 
     fun onSSHHostnameChange(value: String) {

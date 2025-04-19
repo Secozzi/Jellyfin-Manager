@@ -9,6 +9,7 @@ fun initKoin(
     includes(
         PreferencesModule(datastorePath),
         DatabaseModule,
+        SSHModule,
         ScreenModelsModule,
     )
 }

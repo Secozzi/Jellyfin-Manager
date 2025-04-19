@@ -33,7 +33,7 @@ fun ErrorScreenContent(
         )
 
         Text(
-            text = error.message ?: "Unknown error occurred",
+            text = error.toString(),
             style = MaterialTheme.typography.labelMedium,
             modifier = Modifier.padding(MaterialTheme.spacing.smaller),
         )

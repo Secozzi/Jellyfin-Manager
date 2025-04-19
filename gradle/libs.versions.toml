@@ -1,11 +1,11 @@
 [versions]
 agp = "8.9.1"
 android-compileSdk = "35"
-android-minSdk = "24"
+android-minSdk = "26"
 android-targetSdk = "35"
 androidx-activityCompose = "1.10.1"
 androidx-lifecycle = "2.8.4"
-compose-multiplatform = "1.7.3"
+compose-multiplatform = "1.8.0-beta02"
 kotlin = "2.1.10"
 kotlinx-coroutines = "1.10.1"
 kotlinx-serialization = "1.8.1"
@@ -20,7 +20,11 @@ voyager = "1.1.0-beta03"
 materialmotion = "2.0.1"
 compose-settings = "2.6.0"
 sqldelight = "2.0.2"
-sonner = "0.3.8"
+sshj = "0.38.0"
+bouncycastle = "1.78.1"
+sqliteJdbcCrypt = "3.49.1.0"
+sqlcipherAndroid = "4.7.2"
+ptr = "1.4.0-beta03"
 
 [libraries]
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3-android" }
@@ -48,15 +52,20 @@ voyager-koin = { module = "cafe.adriel.voyager:voyager-koin", version.ref = "voy
 voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
 voyager-tab = { module = "cafe.adriel.voyager:voyager-tab-navigator", version.ref = "voyager" }
 
+compose-backhandler = { module = "org.jetbrains.compose.ui:ui-backhandler", version.ref = "compose-multiplatform" }
 compose-settings = { module = "com.github.alorma.compose-settings:ui-tiles", version.ref = "compose-settings" }
 compose-settings-extended = { module = "com.github.alorma.compose-settings:ui-tiles-extended", version.ref = "compose-settings" }
 compose-materialmotion = { module = "io.github.fornewid:material-motion-compose-core", version.ref = "materialmotion" }
+compose-ptr = { module = "dev.materii.pullrefresh:pullrefresh", version.ref = "ptr" }
 
 sqldelight-android = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
 sqldelight-desktop = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqldelight" }
 sqldelight-coroutines = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "sqldelight" }
+willena-sqlite-jdbc = { module = "io.github.willena:sqlite-jdbc", version.ref = "sqliteJdbcCrypt" }
+sqlcipher-android = { module = "net.zetetic:sqlcipher-android", version.ref = "sqlcipherAndroid" }
 
-sonner = { module = "io.github.dokar3:sonner", version.ref = "sonner" }
+sshj = { module = "com.hierynomus:sshj", version.ref = "sshj" }
+bouncycastle = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 
 [bundles]
 datastore = ["datastore-core", "datastore-preferences"]

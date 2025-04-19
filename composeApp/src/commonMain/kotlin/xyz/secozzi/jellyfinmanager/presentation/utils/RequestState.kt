@@ -15,6 +15,7 @@ sealed class RequestState<out T> {
     data class Success<T>(val data: T) : RequestState<T>()
     data class Error(val throwable: Throwable) : RequestState<Nothing>()
 
+    fun isIdle() = this is Idle
     fun isLoading() = this is Loading
     fun isSuccess() = this is Success
     fun isError() = this is Error
