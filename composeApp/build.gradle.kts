@@ -38,6 +38,7 @@ kotlin {
             implementation(libs.sqldelight.android)
             implementation(libs.koin.android)
             implementation(libs.koin.android.compat)
+            implementation(libs.koin.android.startup)
         }
         commonMain.dependencies {
             implementation(compose.runtime)

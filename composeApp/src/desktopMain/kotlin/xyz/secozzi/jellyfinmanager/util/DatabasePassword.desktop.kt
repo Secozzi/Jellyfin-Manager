@@ -12,10 +12,10 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.random.Random
 
 @OptIn(ExperimentalEncodingApi::class)
-object Crypto {
+actual object DatabasePassword {
     private val generalPreferences by inject<BasePreferences>(BasePreferences::class.java)
-
-    fun getDatabasePassword(): ByteArray {
+    
+    actual fun getDatabasePassword(): ByteArray {
         var encryptedPassword = generalPreferences.sqlPassword.get()
         if (encryptedPassword.isBlank()) {
             val password = getRandomString().encrypt(KEY_PASSWORD)
@@ -73,7 +73,7 @@ object Crypto {
 
     private const val ALGORITHM = "AES/CBC/PKCS5Padding"
     private const val KEY_ALGORITHM = "PBKDF2WithHmacSHA256"
-    private const val ITERATIONS = 2048
+    private const val ITERATIONS = 4096
     private const val KEY_LENGTH = 256
     private const val SALT_LENGTH = 16
     private const val IV_LENGTH = 16

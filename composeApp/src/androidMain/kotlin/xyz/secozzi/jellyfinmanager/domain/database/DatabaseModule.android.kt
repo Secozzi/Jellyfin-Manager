@@ -5,21 +5,19 @@ import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import org.koin.dsl.module
 import xyz.secozzi.jellyfinmanager.domain.db.JMDatabase
-import xyz.secozzi.jellyfinmanager.util.Crypto
+import xyz.secozzi.jellyfinmanager.util.DatabasePassword
 
 actual val JMDatabaseModule = module {
     single {
         System.loadLibrary("sqlcipher")
 
         // From https://github.com/jobobby04/TachiyomiSY
-        val factory = SupportOpenHelperFactory(Crypto.getDatabasePassword(), null, false)
-
         JMDatabase(
             AndroidSqliteDriver(
                 schema = JMDatabase.Schema,
                 context = get(),
                 name = DB_NAME,
-                factory = factory,
+                factory = SupportOpenHelperFactory(DatabasePassword.getDatabasePassword(), null, false),
                 callback = object : AndroidSqliteDriver.Callback(JMDatabase.Schema) {
                     override fun onOpen(db: SupportSQLiteDatabase) {
                         super.onOpen(db)

@@ -5,7 +5,7 @@ import org.koin.dsl.module
 import org.sqlite.mc.SQLiteMCSqlCipherConfig
 import xyz.secozzi.jellyfinmanager.domain.db.JMDatabase
 import xyz.secozzi.jellyfinmanager.getConfigDir
-import xyz.secozzi.jellyfinmanager.util.Crypto
+import xyz.secozzi.jellyfinmanager.util.DatabasePassword
 import java.io.File
 import java.util.Properties
 
@@ -15,7 +15,7 @@ actual val JMDatabaseModule = module {
 
         // From https://github.com/AChep/keyguard-app
         val sqlCipherProps = SQLiteMCSqlCipherConfig.getDefault()
-            .withRawUnsaltedKey(Crypto.getDatabasePassword())
+            .withRawUnsaltedKey(DatabasePassword.getDatabasePassword())
             .build()
             .toProperties()
 
