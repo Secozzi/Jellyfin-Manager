@@ -2,6 +2,7 @@ package xyz.secozzi.jellyfinmanager.presentation.ssh
 
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -28,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import dev.materii.pullrefresh.PullRefreshLayout
 import dev.materii.pullrefresh.PullRefreshState
 import xyz.secozzi.jellyfinmanager.domain.ssh.model.Directory
@@ -57,7 +59,7 @@ fun SSHScreen(
                 Icon(Icons.Filled.Add, null)
             }
         }
-    ) { _ ->
+    ) {
         Column {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -99,7 +101,9 @@ fun SSHScreen(
                 modifier = Modifier.fillMaxSize(),
                 enabled = platform == Platform.Android,
             ) {
-                LazyColumn {
+                LazyColumn(
+                    contentPadding = PaddingValues(bottom = 80.dp),
+                ) {
                     items(directories) { directory ->
                         ListItem(
                             modifier = if (directory.isDirectory) {
