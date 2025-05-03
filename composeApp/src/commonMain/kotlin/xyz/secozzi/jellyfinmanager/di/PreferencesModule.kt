@@ -14,7 +14,5 @@ val PreferencesModule: (String) -> Module = { dataStorePath ->
         single { createDataStore { dataStorePath } }
         singleOf(::DataStorePreferenceStore).bind(PreferenceStore::class)
         singleOf(::BasePreferences)
-        // singleOf(::JellyfinPreferences)
-        // singleOf(::SSHPreferences)
     }
 }

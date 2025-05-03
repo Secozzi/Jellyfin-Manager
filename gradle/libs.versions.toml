@@ -5,7 +5,7 @@ android-minSdk = "26"
 android-targetSdk = "35"
 androidx-activityCompose = "1.10.1"
 androidx-lifecycle = "2.8.4"
-compose-multiplatform = "1.8.0-beta02"
+compose-multiplatform = "1.8.0-rc01"
 kotlin = "2.1.10"
 kotlinx-coroutines = "1.10.1"
 kotlinx-serialization = "1.8.1"
@@ -25,6 +25,9 @@ bouncycastle = "1.78.1"
 sqliteJdbcCrypt = "3.49.1.0"
 sqlcipherAndroid = "4.7.2"
 ptr = "1.4.0-beta03"
+jellyfin = "1.6.8"
+kmp-uri = "0.0.19"
+coil = "3.1.0"
 
 [libraries]
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3-android" }
@@ -68,11 +71,18 @@ sqlcipher-android = { module = "net.zetetic:sqlcipher-android", version.ref = "s
 sshj = { module = "com.hierynomus:sshj", version.ref = "sshj" }
 bouncycastle = { module = "org.bouncycastle:bcprov-jdk18on", version.ref = "bouncycastle" }
 
+jellyfin-sdk = { module = "org.jellyfin.sdk:jellyfin-core", version.ref = "jellyfin" }
+kmp-uri = { module = "com.eygraber:uri-kmp", version.ref = "kmp-uri" }
+
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
+
 [bundles]
 datastore = ["datastore-core", "datastore-preferences"]
 koin = ["koin-compose", "koin-core", "koin-compose-viewmodel", "koin-core-viewmodel"]
 voyager = ["voyager-navigator", "voyager-screenmodel", "voyager-koin", "voyager-transitions", "voyager-tab"]
 compose-settings = ["compose-settings", "compose-settings-extended"]
+coil = ["coil-compose", "coil-network-okhttp"]
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

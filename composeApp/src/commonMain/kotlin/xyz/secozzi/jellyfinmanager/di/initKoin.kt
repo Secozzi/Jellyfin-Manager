@@ -10,6 +10,7 @@ fun initKoin(
         PreferencesModule(datastorePath),
         DatabaseModule,
         SSHModule,
+        JellyfinModule,
         ScreenModelsModule,
     )
 }

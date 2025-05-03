@@ -60,6 +60,9 @@ kotlin {
             implementation(libs.sqldelight.coroutines)
             implementation(libs.sshj)
             implementation(libs.compose.ptr)
+            implementation(libs.jellyfin.sdk)
+            implementation(libs.kmp.uri)
+            implementation(libs.bundles.coil)
 
             api(libs.bundles.datastore)
             api(libs.bundles.koin)
