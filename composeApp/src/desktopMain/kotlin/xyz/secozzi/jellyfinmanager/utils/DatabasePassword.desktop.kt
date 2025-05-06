@@ -1,4 +1,4 @@
-package xyz.secozzi.jellyfinmanager.util
+package xyz.secozzi.jellyfinmanager.utils
 
 import org.koin.java.KoinJavaComponent.inject
 import xyz.secozzi.jellyfinmanager.preferences.BasePreferences

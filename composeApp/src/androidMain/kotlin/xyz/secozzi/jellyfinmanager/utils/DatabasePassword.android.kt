@@ -1,4 +1,4 @@
-package xyz.secozzi.jellyfinmanager.util
+package xyz.secozzi.jellyfinmanager.utils
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
@@ -25,8 +25,10 @@ actual object DatabasePassword {
     }
 
     actual fun getDatabasePassword(): ByteArray {
-        if (generalPreferences.sqlPassword.get().isBlank()) generateAndEncryptSqlPw()
-        return decrypt(generalPreferences.sqlPassword.get(), AliasSql)
+        val encrypted = generalPreferences.sqlPassword.get().ifBlank {
+            generateAndEncryptSqlPw()
+        }
+        return decrypt(encrypted, AliasSql)
     }
 
     private val encryptionCipherSql
@@ -89,6 +91,7 @@ actual object DatabasePassword {
             val iv = ByteArray(IvSize)
             input.read(iv)
             val cipher = getDecryptCipher(iv, alias)
+
             ByteArrayOutputStreamPassword().use { output ->
                 val buffer = ByteArray(BufferSize)
                 while (inputStream.available() > BufferSize) {
@@ -103,7 +106,7 @@ actual object DatabasePassword {
         }
     }
 
-    private fun generateAndEncryptSqlPw() {
+    private fun generateAndEncryptSqlPw(): String {
         val charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
         val passwordArray = CharArray(SqlPasswordLength)
         for (i in 0..<SqlPasswordLength) {
@@ -112,12 +115,14 @@ actual object DatabasePassword {
         val passwordBuffer = Charsets.UTF_8.encode(CharBuffer.wrap(passwordArray))
         val passwordBytes = ByteArray(passwordBuffer.limit())
         passwordBuffer.get(passwordBytes)
-        generalPreferences.sqlPassword.set(encrypt(passwordBytes, encryptionCipherSql))
+        val encrypted = encrypt(passwordBytes, encryptionCipherSql)
+        generalPreferences.sqlPassword.set(encrypted)
             .also {
                 passwordArray.fill('#')
                 passwordBuffer.array().fill('#'.code.toByte())
                 passwordBytes.fill('#'.code.toByte())
             }
+        return encrypted
     }
 }
 

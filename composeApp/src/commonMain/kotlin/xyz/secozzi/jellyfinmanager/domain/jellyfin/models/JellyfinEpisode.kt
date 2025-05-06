@@ -12,7 +12,7 @@ data class JellyfinEpisode(
     override val type: BaseItemKind,
     val episodeNumber: Int,
     val path: String,
-) : JellyfinItem, java.io.Serializable
+) : JellyfinItem
 
 fun BaseItemDto.toJellyfinEpisode(baseUrl: String): JellyfinEpisode {
     return JellyfinEpisode(

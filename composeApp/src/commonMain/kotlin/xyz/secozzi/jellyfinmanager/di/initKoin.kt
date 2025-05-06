@@ -11,6 +11,6 @@ fun initKoin(
         DatabaseModule,
         SSHModule,
         JellyfinModule,
-        ScreenModelsModule,
+        ViewModelsModule,
     )
 }

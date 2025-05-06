@@ -5,7 +5,7 @@ import org.koin.dsl.module
 import org.sqlite.mc.SQLiteMCSqlCipherConfig
 import xyz.secozzi.jellyfinmanager.domain.db.JMDatabase
 import xyz.secozzi.jellyfinmanager.getConfigDir
-import xyz.secozzi.jellyfinmanager.util.DatabasePassword
+import xyz.secozzi.jellyfinmanager.utils.DatabasePassword
 import java.io.File
 import java.util.Properties
 

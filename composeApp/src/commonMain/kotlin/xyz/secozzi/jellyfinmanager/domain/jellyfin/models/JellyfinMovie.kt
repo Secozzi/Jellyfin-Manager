@@ -10,7 +10,7 @@ data class JellyfinMovie(
     override val parentId: UUID?,
     override val image: JellyfinImage,
     override val type: BaseItemKind,
-) : JellyfinItem, java.io.Serializable
+) : JellyfinItem
 
 fun BaseItemDto.toJellyfinMovie(baseUrl: String): JellyfinMovie {
     return JellyfinMovie(

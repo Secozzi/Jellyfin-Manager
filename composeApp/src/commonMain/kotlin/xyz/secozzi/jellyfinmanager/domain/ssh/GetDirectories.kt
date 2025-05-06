@@ -2,7 +2,6 @@ package xyz.secozzi.jellyfinmanager.domain.ssh
 
 import net.schmizz.sshj.SSHClient
 import xyz.secozzi.jellyfinmanager.data.ssh.ExecuteSSH
-import xyz.secozzi.jellyfinmanager.data.ssh.GetSSHClient
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.ssh.model.Directory
 import java.io.IOException

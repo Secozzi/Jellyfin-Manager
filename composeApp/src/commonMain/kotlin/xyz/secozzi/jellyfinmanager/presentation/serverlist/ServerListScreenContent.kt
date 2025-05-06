@@ -22,7 +22,7 @@ import xyz.secozzi.jellyfinmanager.presentation.serverlist.components.ServerList
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 
 @Composable
-fun ServerListScreen(
+fun ServerListScreenContent(
     serverList: List<Server>,
     onClickEdit: (Server) -> Unit,
     onClickDelete: (Server) -> Unit,

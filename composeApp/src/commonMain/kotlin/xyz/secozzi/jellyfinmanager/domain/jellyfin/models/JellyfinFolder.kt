@@ -10,7 +10,7 @@ data class JellyfinFolder(
     override val parentId: UUID?,
     override val image: JellyfinImage,
     override val type: BaseItemKind,
-) : JellyfinItem, java.io.Serializable
+) : JellyfinItem
 
 fun BaseItemDto.toJellyfinFolder(baseUrl: String): JellyfinFolder {
     return JellyfinFolder(

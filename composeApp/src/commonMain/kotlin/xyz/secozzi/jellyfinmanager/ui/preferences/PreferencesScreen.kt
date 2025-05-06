@@ -14,52 +14,50 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.alorma.compose.settings.ui.SettingsMenuLink
-import xyz.secozzi.jellyfinmanager.presentation.utils.Screen
-import xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.ServerListScreen
+import kotlinx.serialization.Serializable
+import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
+import xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.ServerListRoute
 
-object PreferencesScreen : Screen() {
-    private fun readResolve(): Any = PreferencesScreen
+@Serializable
+data object PreferencesRoute
 
-    @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+@Composable
+fun PreferencesScreen() {
+    val navigator = LocalNavController.current
 
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text("Preferences")
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { navigator.pop() }) {
-                            Icon(Icons.AutoMirrored.Default.ArrowBack, null)
-                        }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text("Preferences")
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navigator.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Default.ArrowBack, null)
                     }
-                )
-            }
-        ) { contentPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(contentPadding)
-            ) {
-                SettingsMenuLink(
-                    title = { Text(text = "Appearance") },
-                    subtitle = { Text(text = "Dark mode, Material You") },
-                    icon = { Icon(Icons.Outlined.Palette, null) },
-                    onClick = { navigator.push(AppearancePreferencesScreen) }
-                )
+                }
+            )
+        }
+    ) { contentPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding)
+        ) {
+            SettingsMenuLink(
+                title = { Text(text = "Appearance") },
+                subtitle = { Text(text = "Dark mode, Material You") },
+                icon = { Icon(Icons.Outlined.Palette, null) },
+                onClick = { navigator.navigate(AppearancePreferencesRoute) }
+            )
 
-                SettingsMenuLink(
-                    title = { Text(text = "Servers") },
-                    subtitle = { Text(text = "Configure server list") },
-                    icon = { Icon(Icons.Outlined.Dns, null) },
-                    onClick = { navigator.push(ServerListScreen) }
-                )
-            }
+            SettingsMenuLink(
+                title = { Text(text = "Servers") },
+                subtitle = { Text(text = "Configure server list") },
+                icon = { Icon(Icons.Outlined.Dns, null) },
+                onClick = { navigator.navigate(ServerListRoute) }
+            )
         }
     }
 }

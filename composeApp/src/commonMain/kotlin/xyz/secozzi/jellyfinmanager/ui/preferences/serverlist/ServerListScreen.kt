@@ -1,7 +1,5 @@
 package xyz.secozzi.jellyfinmanager.ui.preferences.serverlist
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -16,72 +14,66 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
-import xyz.secozzi.jellyfinmanager.presentation.serverlist.ServerListScreen
+import kotlinx.serialization.Serializable
+import org.koin.compose.viewmodel.koinViewModel
+import xyz.secozzi.jellyfinmanager.presentation.serverlist.ServerListScreenContent
 import xyz.secozzi.jellyfinmanager.presentation.serverlist.components.ServerListDeleteDialog
-import xyz.secozzi.jellyfinmanager.presentation.utils.Screen
-import xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.server.ServerScreen
+import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
+import xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.server.ServerRoute
 
-object ServerListScreen : Screen() {
-    private fun readResolve(): Any = ServerListScreen
+@Serializable
+data object ServerListRoute
 
-    @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+@Composable
+fun ServerListScreen() {
+    val navigator = LocalNavController.current
 
-        val screenModel = koinScreenModel<ServerListScreenModel>()
-        val serverList by screenModel.serverList.collectAsState()
-        val dialog by screenModel.dialog.collectAsState()
+    val viewModel = koinViewModel<ServerListScreenViewModel>()
+    val serverList by viewModel.serverList.collectAsState()
+    val dialog by viewModel.dialog.collectAsState()
 
-        when (dialog) {
-            ServerListScreenModel.ServerListDialog.None -> {}
-            is ServerListScreenModel.ServerListDialog.Delete -> {
-                val server = (dialog as ServerListScreenModel.ServerListDialog.Delete).server
-                ServerListDeleteDialog(
-                    onDismissRequest = screenModel::dismissDialog,
-                    onDelete = { screenModel.delete(server) },
-                    title = server.name,
-                )
-            }
-        }
-
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text("Server list")
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { navigator.pop() }) {
-                            Icon(Icons.AutoMirrored.Default.ArrowBack, null)
-                        }
-                    }
-                )
-            },
-            floatingActionButton = {
-                ExtendedFloatingActionButton(
-                    onClick = {
-                        val names = serverList.map { it.name }
-                        navigator.push(ServerScreen(null, names))
-                    },
-                    icon = { Icon(Icons.Filled.Add, null) },
-                    text = { Text("Add") },
-                )
-            }
-        ) { contentPadding ->
-            ServerListScreen(
-                serverList = serverList,
-                onClickEdit = {
-                    val names = serverList.map { s -> s.name } - it.name
-                    navigator.push(ServerScreen(it, names))
-                },
-                onClickDelete = { screenModel.showDialog(ServerListScreenModel.ServerListDialog.Delete(it)) },
-                onClickMoveUp = screenModel::moveUp,
-                onClickMoveDown = screenModel::moveDown,
-                modifier = Modifier.padding(contentPadding),
+    when (dialog) {
+        ServerListScreenViewModel.ServerListDialog.None -> {}
+        is ServerListScreenViewModel.ServerListDialog.Delete -> {
+            val server = (dialog as ServerListScreenViewModel.ServerListDialog.Delete).server
+            ServerListDeleteDialog(
+                onDismissRequest = viewModel::dismissDialog,
+                onDelete = { viewModel.delete(server) },
+                title = server.name,
             )
         }
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text("Server list")
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navigator.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Default.ArrowBack, null)
+                    }
+                }
+            )
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = { navigator.navigate(ServerRoute(null)) },
+                icon = { Icon(Icons.Filled.Add, null) },
+                text = { Text("Add") },
+            )
+        }
+    ) { contentPadding ->
+        ServerListScreenContent(
+            serverList = serverList,
+            onClickEdit = {
+                navigator.navigate(ServerRoute(it.id))
+            },
+            onClickDelete = { viewModel.showDialog(ServerListScreenViewModel.ServerListDialog.Delete(it)) },
+            onClickMoveUp = viewModel::moveUp,
+            onClickMoveDown = viewModel::moveDown,
+            modifier = Modifier.padding(contentPadding),
+        )
     }
 }

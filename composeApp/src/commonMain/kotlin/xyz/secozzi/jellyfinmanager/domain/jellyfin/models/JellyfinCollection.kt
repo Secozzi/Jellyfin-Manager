@@ -33,7 +33,7 @@ data class JellyfinCollection(
     override val parentId: UUID? = null,
     override val image: JellyfinImage,
     override val type: BaseItemKind,
-) : JellyfinItem, java.io.Serializable
+) : JellyfinItem
 
 fun BaseItemDto.toJellyfinCollection(baseUrl: String): JellyfinCollection? {
     val type = CollectionType.fromString(this.collectionType?.serialName)

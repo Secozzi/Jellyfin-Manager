@@ -1,4 +1,4 @@
-package xyz.secozzi.jellyfinmanager.util
+package xyz.secozzi.jellyfinmanager.utils
 
 expect object DatabasePassword {
     fun getDatabasePassword(): ByteArray

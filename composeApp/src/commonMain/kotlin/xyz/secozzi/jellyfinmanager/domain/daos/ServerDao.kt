@@ -4,8 +4,6 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.db.JMDatabase

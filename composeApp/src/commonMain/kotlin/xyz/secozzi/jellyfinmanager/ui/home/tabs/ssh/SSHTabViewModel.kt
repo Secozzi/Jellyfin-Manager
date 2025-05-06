@@ -1,7 +1,6 @@
 package xyz.secozzi.jellyfinmanager.ui.home.tabs.ssh
 
-import cafe.adriel.voyager.core.model.StateScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,6 +13,7 @@ import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.ssh.GetDirectories
 import xyz.secozzi.jellyfinmanager.domain.ssh.model.Directory
 import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
+import xyz.secozzi.jellyfinmanager.presentation.utils.StateViewModel
 import xyz.secozzi.jellyfinmanager.presentation.utils.toRequestState
 import java.io.IOException
 
@@ -22,11 +22,11 @@ sealed interface SSHDialogs {
     data class DeleteDirectory(val directory: Directory) : SSHDialogs
 }
 
-class SSHTabScreenModel(
+class SSHTabViewModel(
     private val getSSHClient: GetSSHClient,
     private val getDirectories: GetDirectories,
     private val executeSSH: ExecuteSSH,
-) : StateScreenModel<RequestState<List<Directory>>>(RequestState.Idle) {
+) : StateViewModel<RequestState<List<Directory>>>(RequestState.Idle) {
 
     private val currentServer = MutableStateFlow<Server?>(null)
 
@@ -50,7 +50,7 @@ class SSHTabScreenModel(
             currentServer.update { _ -> s }
             _pathList.update { _ -> listOf(s.sshBaseDir) }
 
-            screenModelScope.launch(Dispatchers.IO) {
+            viewModelScope.launch(Dispatchers.IO) {
                 try {
                     sshClient = getSSHClient(s)
                     refresh()
@@ -74,7 +74,7 @@ class SSHTabScreenModel(
     }
 
     fun onClickDirectory(directory: Directory) {
-        screenModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             _pathList.update { p -> p + directory.name }
             refresh()
         }
@@ -85,7 +85,7 @@ class SSHTabScreenModel(
             return
         }
 
-        screenModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             _pathList.update { p -> p.subList(0, index + 1) }
             refresh()
         }
@@ -118,7 +118,7 @@ class SSHTabScreenModel(
     private fun executeCommand(commands: List<String>) {
         val server = currentServer.value ?: return
 
-        screenModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             mutableState.update { _ -> RequestState.Loading }
 
             executeSSH.invoke(

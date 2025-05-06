@@ -1,7 +1,7 @@
 package xyz.secozzi.jellyfinmanager.ui.preferences.serverlist
 
-import cafe.adriel.voyager.core.model.ScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,33 +15,33 @@ import kotlinx.coroutines.withContext
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.usecase.ServerUseCase
 
-class ServerListScreenModel(
+class ServerListScreenViewModel(
     private val serverUseCase: ServerUseCase,
-) : ScreenModel {
+) : ViewModel() {
     private val _dialog = MutableStateFlow<ServerListDialog>(ServerListDialog.None)
     val dialog = _dialog.asStateFlow()
 
     val serverList: StateFlow<List<Server>> = serverUseCase.getServers()
         .stateIn(
-            scope = screenModelScope,
+            scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
             initialValue = emptyList()
         )
 
     fun moveUp(server: Server) {
-        screenModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             serverUseCase.decreaseIndex(server)
         }
     }
 
     fun moveDown(server: Server) {
-        screenModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             serverUseCase.increaseIndex(server)
         }
     }
 
     fun delete(server: Server) {
-        screenModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             withContext(NonCancellable) {
                 serverUseCase.delete(server)
             }

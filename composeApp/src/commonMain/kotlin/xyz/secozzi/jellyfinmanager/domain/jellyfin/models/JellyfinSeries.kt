@@ -10,7 +10,7 @@ data class JellyfinSeries(
     override val parentId: UUID?,
     override val image: JellyfinImage,
     override val type: BaseItemKind,
-) : JellyfinItem, java.io.Serializable
+) : JellyfinItem
 
 fun BaseItemDto.toJellyfinSeries(baseUrl: String): JellyfinSeries {
     return JellyfinSeries(

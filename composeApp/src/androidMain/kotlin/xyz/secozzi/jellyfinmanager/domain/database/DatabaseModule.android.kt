@@ -5,7 +5,7 @@ import app.cash.sqldelight.driver.android.AndroidSqliteDriver
 import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 import org.koin.dsl.module
 import xyz.secozzi.jellyfinmanager.domain.db.JMDatabase
-import xyz.secozzi.jellyfinmanager.util.DatabasePassword
+import xyz.secozzi.jellyfinmanager.utils.DatabasePassword
 
 actual val JMDatabaseModule = module {
     single {

@@ -1,12 +1,12 @@
 package xyz.secozzi.jellyfinmanager.domain.jellyfin.models
 
 import com.eygraber.uri.Uri
-import org.jellyfin.sdk.Jellyfin
+import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.ImageType
-import java.net.URI
 
 // From https://github.com/jarnedemeulemeester/findroid
+@Serializable
 data class JellyfinImage(
     val primary: Uri? = null,
     // val showPrimary: Uri? = null,

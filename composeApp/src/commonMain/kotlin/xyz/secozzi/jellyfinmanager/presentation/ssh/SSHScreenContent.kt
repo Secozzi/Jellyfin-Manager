@@ -1,9 +1,11 @@
 package xyz.secozzi.jellyfinmanager.presentation.ssh
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,11 +25,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import dev.materii.pullrefresh.PullRefreshLayout
@@ -39,11 +44,11 @@ import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreenContent
 import xyz.secozzi.jellyfinmanager.presentation.ssh.components.PathLevelIndication
 import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
-import xyz.secozzi.jellyfinmanager.util.Platform
-import xyz.secozzi.jellyfinmanager.util.platform
+import xyz.secozzi.jellyfinmanager.utils.Platform
+import xyz.secozzi.jellyfinmanager.utils.platform
 
 @Composable
-fun SSHScreen(
+fun SSHScreenContent(
     state: RequestState<List<Directory>>,
     pathList: List<String>,
     ptrState: PullRefreshState,
@@ -58,7 +63,9 @@ fun SSHScreen(
             FloatingActionButton(onClick = onAdd) {
                 Icon(Icons.Filled.Add, null)
             }
-        }
+        },
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets
+            .exclude(NavigationBarDefaults.windowInsets),
     ) {
         Column {
             Row(

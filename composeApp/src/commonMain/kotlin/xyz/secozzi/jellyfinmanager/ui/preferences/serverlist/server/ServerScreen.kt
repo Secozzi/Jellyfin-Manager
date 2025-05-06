@@ -20,75 +20,75 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
-import org.koin.core.parameter.parametersOf
-import xyz.secozzi.jellyfinmanager.domain.database.models.Server
-import xyz.secozzi.jellyfinmanager.presentation.serverlist.server.ServerScreen
-import xyz.secozzi.jellyfinmanager.presentation.utils.Screen
+import kotlinx.serialization.Serializable
+import org.koin.compose.viewmodel.koinViewModel
+import xyz.secozzi.jellyfinmanager.presentation.serverlist.server.ServerScreenContent
+import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 
-class ServerScreen(
-    private val initialServer: Server? = null,
-    private val serverNames: List<String> = emptyList(),
-) : Screen() {
-    @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
-        val screenModel = koinScreenModel<ServerScreenModel>(
-            parameters = { parametersOf(initialServer, serverNames) }
-        )
-        val state by screenModel.state.collectAsState()
-        val server by screenModel.server.collectAsState()
-        val isValid by screenModel.isValid.collectAsState()
+@Serializable
+data class ServerRoute(
+    val id: Long? = null,
+)
 
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text("Server")
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = { navigator.pop() }) {
-                            Icon(Icons.AutoMirrored.Default.ArrowBack, null)
-                        }
+@Composable
+fun ServerScreen(serverId: Long? = null) {
+    val navigator = LocalNavController.current
+    val viewModel = koinViewModel<ServerScreenViewModel>()
+
+    val state by viewModel.state.collectAsState()
+    val server by viewModel.server.collectAsState()
+    val serverNames by viewModel.serverNames.collectAsState()
+    val isValid by viewModel.isValid.collectAsState()
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text("Server")
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navigator.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Default.ArrowBack, null)
                     }
-                )
-            },
-            bottomBar = {
+                }
+            )
+        },
+        bottomBar = {
+            if (state is ServerScreenViewModel.State.Success) {
                 Button(
-                    onClick = screenModel::saveServer,
+                    onClick = viewModel::saveServer,
                     enabled = isValid,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(WindowInsets.navigationBars.asPaddingValues())
                         .padding(horizontal = MaterialTheme.spacing.medium),
                 ) {
-                    when (state) {
-                        is ServerScreenModel.State.Error -> Icon(Icons.Default.Error, null)
-                        ServerScreenModel.State.Idle -> Text(if (initialServer == null) "Add server" else "Edit server")
-                        ServerScreenModel.State.Success -> Icon(Icons.Default.Check, null)
+                    when ((state as ServerScreenViewModel.State.Success).saveState) {
+                        ServerScreenViewModel.State.SaveState.Error -> Icon(Icons.Default.Error, null)
+                        ServerScreenViewModel.State.SaveState.Idle -> Text(if (serverId == null) "Add server" else "Edit server")
+                        ServerScreenViewModel.State.SaveState.Success -> Icon(Icons.Default.Check, null)
                     }
                 }
             }
-        ) { contentPadding ->
-            ServerScreen(
-                server = server,
-                serverNames = serverNames,
-                onServerNameChange = screenModel::onServerNameChange,
-                onJfAddressChange = screenModel::onJfAddressChange,
-                onJfUsernameChange = screenModel::onJfUsernameChange,
-                onJfPasswordChange = screenModel::onJfPasswordChange,
-                onSSHAddressChange = screenModel::onSSHAddressChange,
-                onSSHPortChange = screenModel::onSSHPortChange,
-                onSSHHostnameChange = screenModel::onSSHHostnameChange,
-                onSSHPasswordChange = screenModel::onSSHPasswordChange,
-                onSSHPrivateKeyChange = screenModel::onSSHPrivateKeyChange,
-                onSSHBaseDirChange = screenModel::onSSHBaseDirChange,
-                onSSHBaseDirBlacklistChange = screenModel::onSSHBaseDirBlacklistChange,
-                modifier = Modifier.padding(contentPadding),
-            )
         }
+    ) { contentPadding ->
+        ServerScreenContent(
+            state = state,
+            server = server,
+            serverNames = serverNames,
+            onServerNameChange = viewModel::onServerNameChange,
+            onJfAddressChange = viewModel::onJfAddressChange,
+            onJfUsernameChange = viewModel::onJfUsernameChange,
+            onJfPasswordChange = viewModel::onJfPasswordChange,
+            onSSHAddressChange = viewModel::onSSHAddressChange,
+            onSSHPortChange = viewModel::onSSHPortChange,
+            onSSHHostnameChange = viewModel::onSSHHostnameChange,
+            onSSHPasswordChange = viewModel::onSSHPasswordChange,
+            onSSHPrivateKeyChange = viewModel::onSSHPrivateKeyChange,
+            onSSHBaseDirChange = viewModel::onSSHBaseDirChange,
+            onSSHBaseDirBlacklistChange = viewModel::onSSHBaseDirBlacklistChange,
+            modifier = Modifier.padding(contentPadding),
+        )
     }
 }

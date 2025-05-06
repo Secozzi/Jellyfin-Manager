@@ -1,202 +1,165 @@
 package xyz.secozzi.jellyfinmanager.ui.home
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.RowScope
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarDefaults
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.util.fastForEach
-import cafe.adriel.voyager.koin.koinScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
-import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
-import cafe.adriel.voyager.navigator.tab.TabNavigator
-import kotlinx.collections.immutable.ImmutableList
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import jellyfin_manager.composeapp.generated.resources.Res
+import jellyfin_manager.composeapp.generated.resources.jellyfin
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.coroutines.launch
-import soup.compose.material.motion.animation.materialFadeThroughIn
-import soup.compose.material.motion.animation.materialFadeThroughOut
+import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.vectorResource
+import org.koin.compose.viewmodel.koinViewModel
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreenContent
+import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
 import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
-import xyz.secozzi.jellyfinmanager.presentation.utils.Screen
-import xyz.secozzi.jellyfinmanager.presentation.utils.Tab
 import xyz.secozzi.jellyfinmanager.ui.home.components.DropDown
 import xyz.secozzi.jellyfinmanager.ui.home.components.NoServerContent
-import xyz.secozzi.jellyfinmanager.ui.home.tabs.jellyfin.JellyfinTab
-import xyz.secozzi.jellyfinmanager.ui.home.tabs.ssh.SSHTab
-import xyz.secozzi.jellyfinmanager.ui.preferences.PreferencesScreen
-import xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.server.ServerScreen
+import xyz.secozzi.jellyfinmanager.ui.home.tabs.jellyfin.JellyfinRoute
+import xyz.secozzi.jellyfinmanager.ui.home.tabs.jellyfin.JellyfinScreen
+import xyz.secozzi.jellyfinmanager.ui.home.tabs.ssh.SSHRoute
+import xyz.secozzi.jellyfinmanager.ui.home.tabs.ssh.SSHScreen
+import xyz.secozzi.jellyfinmanager.ui.preferences.PreferencesRoute
+import xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.server.ServerRoute
 
-object HomeScreen : Screen() {
-    private fun readResolve(): Any = HomeScreen
+@Serializable
+data object HomeRoute
 
-    private const val TAB_FADE_DURATION = 200
-    private const val TAB_NAVIGATOR_KEY = "HomeTabs"
+data class BottomBarRoute<out T>(val name: String, val route: T, val icon: ImageVector)
 
-    @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+@Composable
+fun HomeScreen() {
+    val tabNavigator = rememberNavController()
+    val navigator = LocalNavController.current
 
-        val screenModel = koinScreenModel<HomeScreenScreenModel>()
-        val serverList by screenModel.serverList.collectAsState()
-        val state by screenModel.state.collectAsState()
+    val viewModel = koinViewModel<HomeScreenViewModel>()
+    val selectedServer by viewModel.selectedServer.collectAsState()
+    val state by viewModel.state.collectAsState()
 
-        val tabs = persistentListOf(
-            SSHTab,
-            JellyfinTab,
-        )
+    val tabs = persistentListOf(
+        BottomBarRoute("SSH", SSHRoute, Icons.Default.Terminal),
+        BottomBarRoute("Jellyfin", JellyfinRoute, vectorResource(Res.drawable.jellyfin)),
+    )
 
-        Scaffold(
-            topBar = {
-                TopAppBar(
-                    title = {
-                        state.getSuccessDataOrNull()?.let { selected ->
-                            DropDown(
-                                server = selected,
-                                values = serverList.toPersistentList(),
-                                onSelect = screenModel::selectServer,
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(onClick = { navigator.push(PreferencesScreen) }) {
-                            Icon(Icons.Rounded.Settings, null)
-                        }
-                    }
-                )
-            },
-            contentWindowInsets = WindowInsets(0),
-        ) { contentPadding ->
-            ServerContent(
-                state = state,
-                serverList = serverList,
-                tabs = tabs,
-                modifier = Modifier.padding(contentPadding)
-            )
-        }
-    }
-
-    @Composable
-    private fun ServerContent(
-        state: RequestState<Server?>,
-        serverList: List<Server>,
-        tabs: ImmutableList<Tab>,
-        modifier: Modifier = Modifier,
-    ) {
-        val navigator = LocalNavigator.currentOrThrow
-
-        TabNavigator(
-            tab = tabs.first(),
-            key = TAB_NAVIGATOR_KEY,
-        ) { tabNavigator ->
-            Scaffold(
-                modifier = modifier,
-                bottomBar = {
-                    NavigationBar {
-                        tabs.fastForEach {
-                            NavigationBarItem(it)
-                        }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    state.getSuccessDataOrNull()?.takeIf { it.isNotEmpty() }?.let { serverList ->
+                        DropDown(
+                            server = selectedServer!!,
+                            values = serverList.toPersistentList(),
+                            onSelect = viewModel::selectServer,
+                        )
                     }
                 },
-                contentWindowInsets = WindowInsets(0),
-            ) { contentPadding ->
-                Box(
-                    modifier = Modifier
-                        .padding(contentPadding)
-                        .consumeWindowInsets(contentPadding),
+                actions = {
+                    IconButton(onClick = { navigator.navigate(PreferencesRoute) }) {
+                        Icon(Icons.Rounded.Settings, null)
+                    }
+                }
+            )
+        },
+        bottomBar = {
+            AnimatedVisibility(
+                visible = state.getSuccessDataOrNull()?.isNotEmpty() == true,
+                enter = fadeIn(tween(300)),
+                exit = fadeOut(tween(300)),
+            ) {
+                NavigationBar(
+                    containerColor = NavigationBarDefaults.containerColor.copy(alpha = 0.34f),
+                    windowInsets = WindowInsets.navigationBars,
                 ) {
-                    AnimatedContent(
-                        targetState = tabNavigator.current,
-                        transitionSpec = {
-                            materialFadeThroughIn(
-                                initialScale = 1f,
-                                durationMillis = TAB_FADE_DURATION,
-                            ) togetherWith
-                                    materialFadeThroughOut(durationMillis = TAB_FADE_DURATION)
-                        },
-                        label = "tabContent",
-                    ) {
-                        tabNavigator.saveableState(key = "currentTab", it) {
-                            if (state.isIdle() || state.isLoading()) {
-                                LoadingScreenContent()
-                                return@saveableState
-                            }
+                    val navBackStackEntry by tabNavigator.currentBackStackEntryAsState()
+                    val currentDestination = navBackStackEntry?.destination
 
-                            if (serverList.isEmpty()) {
-                                NoServerContent(
-                                    onClick = { navigator.push(ServerScreen(null)) },
-                                )
-                                return@saveableState
+                    tabs.forEach { bottomRoute ->
+                        NavigationBarItem(
+                            icon = { Icon(bottomRoute.icon, contentDescription = bottomRoute.name) },
+                            label = { Text(bottomRoute.name) },
+                            selected = currentDestination?.hierarchy?.any { it.hasRoute(bottomRoute.route::class) } == true,
+                            onClick = {
+                                tabNavigator.navigate(bottomRoute.route) {
+                                    popUpTo(tabNavigator.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
+                                }
                             }
-
-                            it.Content()
-                        }
+                        )
                     }
                 }
             }
-        }
-    }
-
-    @Composable
-    private fun RowScope.NavigationBarItem(tab: Tab) {
-        val tabNavigator = LocalTabNavigator.current
-        val navigator = LocalNavigator.currentOrThrow
-        val scope = rememberCoroutineScope()
-        val selected = tabNavigator.current::class == tab::class
-
-        NavigationBarItem(
-            selected = selected,
-            onClick = {
-                if (!selected) {
-                    tabNavigator.current = tab
-                } else {
-                    scope.launch { tab.onReselect(navigator) }
-                }
-            },
-            icon = { NavigationIconItem(tab) },
-            label = {
-                Text(
-                    text = tab.options.title,
-                    style = MaterialTheme.typography.labelLarge,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            },
-            alwaysShowLabel = true,
+        },
+        contentWindowInsets = WindowInsets(0),
+    ) { contentPadding ->
+        HomeScreenContent(
+            tabNavigator = tabNavigator,
+            state = state,
+            modifier = Modifier.padding(contentPadding)
         )
     }
+}
 
-    @Composable
-    private fun NavigationIconItem(tab: Tab) {
-        Box {
-            Icon(
-                painter = tab.options.icon!!,
-                contentDescription = tab.options.title,
-                // TODO: https://issuetracker.google.com/u/0/issues/316327367
-                tint = LocalContentColor.current,
-            )
+
+@Composable
+private fun HomeScreenContent(
+    tabNavigator: NavHostController,
+    state: RequestState<List<Server>>,
+    modifier: Modifier = Modifier,
+) {
+    val navigator = LocalNavController.current
+
+    Surface(modifier) {
+        when {
+            state.isIdle() || state.isLoading() -> {
+                LoadingScreenContent()
+            }
+            state.getSuccessData().isEmpty() -> {
+                NoServerContent(
+                    onClick = { navigator.navigate(ServerRoute(null)) },
+                )
+            }
+            else -> {
+                NavHost(
+                    navController = tabNavigator,
+                    startDestination = SSHRoute,
+                ) {
+                    composable<JellyfinRoute> { JellyfinScreen() }
+                    composable<SSHRoute> { SSHScreen() }
+                }
+            }
         }
     }
 }

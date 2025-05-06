@@ -13,13 +13,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
+import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreenContent
 import xyz.secozzi.jellyfinmanager.presentation.serverlist.server.components.ServerTextField
 import xyz.secozzi.jellyfinmanager.presentation.serverlist.server.components.SettingsSection
 import xyz.secozzi.jellyfinmanager.presentation.utils.isLandscapeMode
+import xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.server.ServerScreenViewModel
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 
 @Composable
-fun ServerScreen(
+fun ServerScreenContent(
+    state: ServerScreenViewModel.State,
     server: Server,
     serverNames: List<String>,
     onServerNameChange: (String) -> Unit,
@@ -35,6 +38,11 @@ fun ServerScreen(
     onSSHBaseDirBlacklistChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    if (state == ServerScreenViewModel.State.Loading) {
+        LoadingScreenContent(modifier)
+        return
+    }
+
     if (isLandscapeMode()) {
         ServerScreenLargeImpl(
             server = server,

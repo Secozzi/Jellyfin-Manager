@@ -53,7 +53,7 @@ kotlin {
             implementation(libs.serialization.json)
             implementation(libs.immutable.collections)
 
-            implementation(libs.bundles.voyager)
+            implementation(libs.navigation.compose)
             implementation(libs.compose.backhandler)
             implementation(libs.compose.materialmotion)
             implementation(libs.bundles.compose.settings)

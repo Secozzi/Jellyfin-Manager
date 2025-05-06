@@ -19,9 +19,23 @@ data class Server(
     val jfAddress: String,
     val jfUsername: String,
     val jfPassword: String,
-) : java.io.Serializable {
+) {
     companion object {
         const val UNINITIALIZED_ID = 0L
         const val UNINITIALIZED_INDEX = -1L
+
+        fun getUninitializedServer() = Server(
+            name = "",
+            sshAddress = "",
+            sshPort = 22L,
+            sshHostname = "",
+            sshPassword = "",
+            sshPrivateKey = "",
+            sshBaseDir = "",
+            sshBaseDirBlacklist = "",
+            jfAddress = "",
+            jfUsername = "",
+            jfPassword = "",
+        )
     }
 }

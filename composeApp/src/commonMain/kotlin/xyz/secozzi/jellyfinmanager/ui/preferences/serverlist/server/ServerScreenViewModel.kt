@@ -1,39 +1,54 @@
 package xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.server
 
 import androidx.compose.runtime.Immutable
-import cafe.adriel.voyager.core.model.StateScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.usecase.ServerUseCase
+import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
+import xyz.secozzi.jellyfinmanager.presentation.utils.StateViewModel
 
-class ServerScreenModel(
-    initialServer: Server?,
-    private val serverNames: List<String>,
+class ServerScreenViewModel(
+    private val savedStateHandle: SavedStateHandle,
     private val serverUseCase: ServerUseCase,
-) : StateScreenModel<ServerScreenModel.State>(State.Idle) {
-    private val _server = MutableStateFlow<Server>(
-        initialServer ?: Server(
-            name = "",
-            sshAddress = "",
-            sshPort = 22L,
-            sshHostname = "",
-            sshPassword = "",
-            sshPrivateKey = "",
-            sshBaseDir = "",
-            sshBaseDirBlacklist = "",
-            jfAddress = "",
-            jfUsername = "",
-            jfPassword = "",
-        )
-    )
+) : StateViewModel<ServerScreenViewModel.State>(State.Loading) {
+    private val serverRoute = savedStateHandle.toRoute<ServerRoute>()
+
+    private val _server = MutableStateFlow<Server>(Server.getUninitializedServer())
     val server = _server.asStateFlow()
 
-    private val _isValid = MutableStateFlow(initialServer != null)
+    private val _serverNames = MutableStateFlow<List<String>>(emptyList())
+    val serverNames = _serverNames.asStateFlow()
+
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            serverUseCase.getServers().take(1).collectLatest { servers ->
+                servers.firstOrNull { it.id == serverRoute.id }?.let {
+                    _server.update { _ -> it }
+                }
+
+                _serverNames.update { _ ->
+                    servers.filterNot { it.id == serverRoute.id }.map { it.name }
+                }
+
+                mutableState.update { _ -> State.Success(State.SaveState.Idle) }
+            }
+        }
+    }
+
+    private val _isValid = MutableStateFlow(false)
     val isValid = _isValid.asStateFlow()
 
     fun onServerNameChange(value: String) {
@@ -89,7 +104,7 @@ class ServerScreenModel(
     private fun updateIsValid() {
         _isValid.update { _ ->
             server.value.name.isNotBlank() &&
-                server.value.name !in serverNames &&
+                server.value.name !in serverNames.value &&
                 server.value.jfAddress.isNotBlank() &&
                 server.value.jfUsername.isNotBlank() &&
                 server.value.sshAddress.isNotBlank() &&
@@ -99,7 +114,7 @@ class ServerScreenModel(
     }
 
     fun saveServer() {
-        screenModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val server = server.value
 
@@ -121,21 +136,26 @@ class ServerScreenModel(
                     )
                 )
 
-                mutableState.update { _ -> State.Success }
+                mutableState.update { _ -> State.Success(State.SaveState.Success) }
             } catch (e: Exception) {
-                mutableState.update { _ -> State.Error }
+                mutableState.update { _ -> State.Success(State.SaveState.Error) }
             }
         }
     }
 
     sealed interface State {
         @Immutable
-        data object Idle : State
+        data object Loading : State
 
         @Immutable
-        data object Error : State
+        data class Success(
+            val saveState: SaveState,
+        ) : State
 
-        @Immutable
-        data object Success : State
+        enum class SaveState {
+            Idle,
+            Error,
+            Success,
+        }
     }
 }
