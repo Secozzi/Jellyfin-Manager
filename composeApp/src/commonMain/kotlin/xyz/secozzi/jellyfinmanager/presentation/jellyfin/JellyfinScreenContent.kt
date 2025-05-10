@@ -12,8 +12,9 @@ import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreenContent
 import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreenContent
 import xyz.secozzi.jellyfinmanager.presentation.ssh.components.PathLevelIndication
 import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
-import xyz.secozzi.jellyfinmanager.ui.home.tabs.jellyfin.JellyfinItems
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinItems
 
+@Suppress("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun JellyfinScreenContent(
     state: RequestState<JellyfinItems>,

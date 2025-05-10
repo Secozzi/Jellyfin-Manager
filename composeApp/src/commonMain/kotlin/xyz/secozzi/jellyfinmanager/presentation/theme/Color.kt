@@ -73,3 +73,6 @@ val SurfaceContainerLowDark = Color(0xFF191C20)
 val SurfaceContainerDark = Color(0xFF1D2024)
 val SurfaceContainerHighDark = Color(0xFF272A2F)
 val SurfaceContainerHighestDark = Color(0xFF32353A)
+
+const val DISABLED_ALPHA = .38f
+const val SECONDARY_ALPHA = .78f

@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinItem
 import xyz.secozzi.jellyfinmanager.presentation.jellyfin.browse.components.JellyfinEntryItem
 import xyz.secozzi.jellyfinmanager.presentation.utils.isLandscapeMode
-import xyz.secozzi.jellyfinmanager.ui.home.tabs.jellyfin.JellyfinItems
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinItems
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 
 @Composable

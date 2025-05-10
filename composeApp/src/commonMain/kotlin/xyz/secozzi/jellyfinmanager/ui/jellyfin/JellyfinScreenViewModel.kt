@@ -1,10 +1,12 @@
-package xyz.secozzi.jellyfinmanager.ui.home.tabs.jellyfin
+package xyz.secozzi.jellyfinmanager.ui.jellyfin
 
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.UUID
 import org.jellyfin.sdk.model.api.BaseItemKind
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
@@ -13,28 +15,32 @@ import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinItem
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinUser
 import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
 import xyz.secozzi.jellyfinmanager.presentation.utils.StateViewModel
+import xyz.secozzi.jellyfinmanager.ui.home.HomeScreenViewModel
 
-class JellyfinTabViewModel(
+class JellyfinScreenViewModel(
     private val jellyfinRepository: JellyfinRepository,
+    private val homeViewModel: HomeScreenViewModel,
 ) : StateViewModel<RequestState<JellyfinItems>>(RequestState.Idle) {
-    private val _selectedServer = MutableStateFlow<Server?>(null)
-    val selectedServer = _selectedServer.asStateFlow()
-
     private val _itemList = MutableStateFlow<List<Pair<String, UUID?>>>(listOf(Pair("Home", null)))
     val itemList = _itemList.asStateFlow()
 
-    private val user = MutableStateFlow<JellyfinUser?>(null)
+    init {
+        viewModelScope.launch {
+            homeViewModel.selectedServer.collect { selected ->
+                selected?.let(::changeServer)
+            }
+        }
+    }
 
     fun changeServer(server: Server?) {
         mutableState.update { _ -> RequestState.Loading }
 
         server?.let { s ->
-            _selectedServer.update { _ -> s }
             viewModelScope.launch {
-                user.update { _ -> jellyfinRepository.loadServer(s) }
+                jellyfinRepository.loadServer(s)
                 _itemList.update { _ -> listOf(Pair("Home", null)) }
 
-                val libraries = jellyfinRepository.getLibraries(user.value!!)
+                val libraries = jellyfinRepository.getLibraries()
                 mutableState.update { _ ->
                     RequestState.Success(
                         JellyfinItems.Libraries(libraries)
@@ -55,7 +61,7 @@ class JellyfinTabViewModel(
         viewModelScope.launch {
             when (itemList.value.size) {
                 1 -> {
-                    val libraries = jellyfinRepository.getLibraries(user.value!!)
+                    val libraries = jellyfinRepository.getLibraries()
                     mutableState.update { _ ->
                         RequestState.Success(
                             JellyfinItems.Libraries(libraries)
@@ -64,7 +70,7 @@ class JellyfinTabViewModel(
                 }
                 else -> {
                     val currentItem = itemList.value.last()
-                    val items = jellyfinRepository.getItems(user.value!!, currentItem.second)
+                    val items = jellyfinRepository.getItems(currentItem.second)
                     mutableState.update { _ ->
                         RequestState.Success(
                             if (itemList.value.size == 2) {
@@ -84,7 +90,7 @@ class JellyfinTabViewModel(
         _itemList.update { i -> i + Pair(item.name, item.id) }
 
         viewModelScope.launch {
-            val items = jellyfinRepository.getItems(user.value!!, item.id)
+            val items = jellyfinRepository.getItems(item.id)
             mutableState.update { _ ->
                 when (item.type) {
                     BaseItemKind.COLLECTION_FOLDER -> RequestState.Success(JellyfinItems.Series(items))
@@ -107,4 +113,11 @@ sealed class JellyfinItems(open val items: List<JellyfinItem>) {
         override val items: List<JellyfinItem>,
         val item: JellyfinItem,
     ) : JellyfinItems(items)
+}
+
+@Serializable
+enum class JellyfinItemType(name: String) {
+    Season("Season"),
+    Movie("Movie"),
+    Series("Series"),
 }

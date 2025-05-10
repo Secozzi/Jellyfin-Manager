@@ -18,12 +18,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
+import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreenContent
+import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreenContent
 import xyz.secozzi.jellyfinmanager.presentation.serverlist.components.ServerListItem
+import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 
 @Composable
 fun ServerListScreenContent(
-    serverList: List<Server>,
+    state: RequestState<List<Server>>,
     onClickEdit: (Server) -> Unit,
     onClickDelete: (Server) -> Unit,
     onClickMoveUp: (Server) -> Unit,
@@ -31,6 +34,18 @@ fun ServerListScreenContent(
     modifier: Modifier = Modifier,
 ) {
     val lazyListState = rememberLazyListState()
+
+    if (state.isLoading() || state.isIdle()) {
+        LoadingScreenContent()
+        return
+    }
+
+    if (state.isError()) {
+        ErrorScreenContent(state.getError())
+        return
+    }
+
+    val serverList = state.getSuccessData()
 
     if (serverList.isEmpty()) {
         Column(

@@ -4,6 +4,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.schmizz.sshj.Config
 import net.schmizz.sshj.SSHClient
+import net.schmizz.sshj.sftp.SFTPClient
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 

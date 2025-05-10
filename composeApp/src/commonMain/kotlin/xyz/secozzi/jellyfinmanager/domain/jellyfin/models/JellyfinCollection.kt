@@ -33,6 +33,11 @@ data class JellyfinCollection(
     override val parentId: UUID? = null,
     override val image: JellyfinImage,
     override val type: BaseItemKind,
+
+    override val path: String,
+    override val overview: String,
+    override val genres: List<String>,
+    override val studios: List<String>,
 ) : JellyfinItem
 
 fun BaseItemDto.toJellyfinCollection(baseUrl: String): JellyfinCollection? {
@@ -43,6 +48,12 @@ fun BaseItemDto.toJellyfinCollection(baseUrl: String): JellyfinCollection? {
             id = this.id,
             image = this.toJellyfinImage(baseUrl),
             type = this.type,
+
+            // Unused
+            path = "",
+            overview = "",
+            genres = emptyList(),
+            studios = emptyList(),
         )
     }
 }

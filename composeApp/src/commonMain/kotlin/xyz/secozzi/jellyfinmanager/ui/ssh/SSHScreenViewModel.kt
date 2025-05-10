@@ -1,4 +1,4 @@
-package xyz.secozzi.jellyfinmanager.ui.home.tabs.ssh
+package xyz.secozzi.jellyfinmanager.ui.ssh
 
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
@@ -13,8 +13,9 @@ import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.ssh.GetDirectories
 import xyz.secozzi.jellyfinmanager.domain.ssh.model.Directory
 import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
+import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState.Companion.toRequestState
 import xyz.secozzi.jellyfinmanager.presentation.utils.StateViewModel
-import xyz.secozzi.jellyfinmanager.presentation.utils.toRequestState
+import xyz.secozzi.jellyfinmanager.ui.home.HomeScreenViewModel
 import java.io.IOException
 
 sealed interface SSHDialogs {
@@ -22,10 +23,11 @@ sealed interface SSHDialogs {
     data class DeleteDirectory(val directory: Directory) : SSHDialogs
 }
 
-class SSHTabViewModel(
+class SSHScreenViewModel(
     private val getSSHClient: GetSSHClient,
     private val getDirectories: GetDirectories,
     private val executeSSH: ExecuteSSH,
+    private val homeViewModel: HomeScreenViewModel,
 ) : StateViewModel<RequestState<List<Directory>>>(RequestState.Idle) {
 
     private val currentServer = MutableStateFlow<Server?>(null)
@@ -40,6 +42,14 @@ class SSHTabViewModel(
 
     fun setDialog(dialog: SSHDialogs?) {
         _dialogShown.update { _ -> dialog }
+    }
+
+    init {
+        viewModelScope.launch {
+            homeViewModel.selectedServer.collect { selected ->
+                selected?.let(::changeServer)
+            }
+        }
     }
 
     fun changeServer(server: Server?) {

@@ -45,10 +45,10 @@ import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
 import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
 import xyz.secozzi.jellyfinmanager.ui.home.components.DropDown
 import xyz.secozzi.jellyfinmanager.ui.home.components.NoServerContent
-import xyz.secozzi.jellyfinmanager.ui.home.tabs.jellyfin.JellyfinRoute
-import xyz.secozzi.jellyfinmanager.ui.home.tabs.jellyfin.JellyfinScreen
-import xyz.secozzi.jellyfinmanager.ui.home.tabs.ssh.SSHRoute
-import xyz.secozzi.jellyfinmanager.ui.home.tabs.ssh.SSHScreen
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinRoute
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinScreen
+import xyz.secozzi.jellyfinmanager.ui.ssh.SSHRoute
+import xyz.secozzi.jellyfinmanager.ui.ssh.SSHScreen
 import xyz.secozzi.jellyfinmanager.ui.preferences.PreferencesRoute
 import xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.server.ServerRoute
 

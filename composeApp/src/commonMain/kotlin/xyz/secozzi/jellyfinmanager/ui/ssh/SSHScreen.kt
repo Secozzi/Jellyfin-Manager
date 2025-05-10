@@ -1,7 +1,6 @@
-package xyz.secozzi.jellyfinmanager.ui.home.tabs.ssh
+package xyz.secozzi.jellyfinmanager.ui.ssh
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,7 +17,6 @@ import org.koin.compose.viewmodel.koinViewModel
 import xyz.secozzi.jellyfinmanager.presentation.components.ConfirmDialog
 import xyz.secozzi.jellyfinmanager.presentation.components.EditTextDialog
 import xyz.secozzi.jellyfinmanager.presentation.ssh.SSHScreenContent
-import xyz.secozzi.jellyfinmanager.ui.home.HomeScreenViewModel
 
 @Serializable
 data object SSHRoute
@@ -26,14 +24,7 @@ data object SSHRoute
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SSHScreen() {
-    val homeViewModel = koinViewModel<HomeScreenViewModel>()
-    val viewModel = koinViewModel<SSHTabViewModel>()
-
-    LaunchedEffect(Unit) {
-        homeViewModel.selectedServer.collect { selected ->
-            selected?.let(viewModel::changeServer)
-        }
-    }
+    val viewModel = koinViewModel<SSHScreenViewModel>()
 
     val state by viewModel.state.collectAsState()
     val dialogShown by viewModel.dialogShown.collectAsState()

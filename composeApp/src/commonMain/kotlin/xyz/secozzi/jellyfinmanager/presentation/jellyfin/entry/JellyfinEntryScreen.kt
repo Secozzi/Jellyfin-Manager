@@ -1,55 +1,72 @@
 package xyz.secozzi.jellyfinmanager.presentation.jellyfin.entry
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import kotlinx.serialization.Serializable
-import org.jellyfin.sdk.model.UUID
-import org.jellyfin.sdk.model.serializer.UUIDSerializer
-import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
-import xyz.secozzi.jellyfinmanager.presentation.utils.serializableType
-import kotlin.reflect.typeOf
-
-@Serializable
-data class JellyfinEntryRouteData(
-    @Serializable(with = UUIDSerializer::class)
-    val itemId: UUID,
-)
-
-@Serializable
-data class JellyfinEntryRoute(
-    val data: JellyfinEntryRouteData,
-) {
-    companion object {
-        val typeMap = mapOf(
-            typeOf<JellyfinEntryRouteData>() to serializableType<JellyfinEntryRouteData>(),
-        )
-    }
-}
+import androidx.compose.ui.Modifier
+import xyz.secozzi.jellyfinmanager.presentation.jellyfin.entry.components.EditableDropdown
+import xyz.secozzi.jellyfinmanager.presentation.theme.DISABLED_ALPHA
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinItemType
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryScreenViewModel.JellyfinEntryDetails
+import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 
 @Composable
-fun JellyfinEntryScreen(itemId: UUID) {
-    val navigator = LocalNavController.current
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = itemId.toString())
-                },
-                navigationIcon = {
-                    IconButton(onClick = { navigator.popBackStack() }) {
-                        Icon(Icons.AutoMirrored.Default.ArrowBack, null)
-                    }
-                }
-            )
-        }
+fun JellyfinEntryScreenContent(
+    item: JellyfinEntryDetails,
+    type: JellyfinItemType,
+    onTitleChange: (String) -> Unit,
+    onStudioChange: (String) -> Unit,
+    onDescriptionChange: (String) -> Unit,
+    onGenreChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .padding(horizontal = MaterialTheme.spacing.medium)
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
     ) {
-        Text("UwU")
+        Text(
+            text = item.path,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = DISABLED_ALPHA),
+        )
+
+        EditableDropdown(
+            value = item.title,
+            label = "Title",
+            values = item.titleList,
+            onValueChange = onTitleChange,
+        )
+
+        OutlinedTextField(
+            value = item.studio,
+            onValueChange = onStudioChange,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Studio") },
+            singleLine = true,
+        )
+
+        OutlinedTextField(
+            value = item.description,
+            onValueChange = onDescriptionChange,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Description") },
+            minLines = 3,
+        )
+
+        OutlinedTextField(
+            value = item.genre,
+            onValueChange = onGenreChange,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Genre") },
+            singleLine = true,
+        )
     }
 }

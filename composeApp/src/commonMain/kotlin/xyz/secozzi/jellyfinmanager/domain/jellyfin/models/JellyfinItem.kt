@@ -10,6 +10,11 @@ interface JellyfinItem {
     val name: String
     val image: JellyfinImage
     val type: BaseItemKind
+
+    val path: String
+    val overview: String
+    val genres: List<String>
+    val studios: List<String>
 }
 
 fun BaseItemDto.toJellyfinItem(baseUrl: String): JellyfinItem? {
@@ -17,8 +22,6 @@ fun BaseItemDto.toJellyfinItem(baseUrl: String): JellyfinItem? {
         BaseItemKind.MOVIE -> toJellyfinMovie(baseUrl)
         BaseItemKind.SEASON -> toJellyfinSeason(baseUrl)
         BaseItemKind.SERIES -> toJellyfinSeries(baseUrl)
-        BaseItemKind.BOX_SET -> toJellyfinBoxSet(baseUrl)
-        BaseItemKind.FOLDER -> toJellyfinFolder(baseUrl)
         BaseItemKind.EPISODE -> toJellyfinEpisode(baseUrl)
         else -> null
     }

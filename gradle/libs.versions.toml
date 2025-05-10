@@ -6,7 +6,7 @@ android-targetSdk = "35"
 androidx-activityCompose = "1.10.1"
 androidx-lifecycle = "2.8.4"
 compose-multiplatform = "1.8.0-rc01"
-kotlin = "2.1.10"
+kotlin = "2.1.20"
 kotlinx-coroutines = "1.10.1"
 kotlinx-serialization = "1.8.1"
 immutable-collections = "0.3.8"
@@ -28,6 +28,7 @@ ptr = "1.4.0-beta03"
 jellyfin = "1.6.8"
 kmp-uri = "0.0.19"
 coil = "3.1.0"
+xml-serialization = "0.91.0"
 
 [libraries]
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3-android" }
@@ -72,11 +73,15 @@ kmp-uri = { module = "com.eygraber:uri-kmp", version.ref = "kmp-uri" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
 
+xml-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xml-serialization" }
+xml-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "xml-serialization" }
+
 [bundles]
 datastore = ["datastore-core", "datastore-preferences"]
 koin = ["koin-compose", "koin-core", "koin-compose-viewmodel", "koin-core-viewmodel"]
 compose-settings = ["compose-settings", "compose-settings-extended"]
 coil = ["coil-compose", "coil-network-okhttp"]
+serialization-xml = ["xml-core", "xml-serialization"]
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

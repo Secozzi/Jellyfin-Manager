@@ -19,12 +19,12 @@ import androidx.navigation.toRoute
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.request.crossfade
-import xyz.secozzi.jellyfinmanager.presentation.jellyfin.entry.JellyfinEntryRoute
-import xyz.secozzi.jellyfinmanager.presentation.jellyfin.entry.JellyfinEntryScreen
 import xyz.secozzi.jellyfinmanager.ui.home.HomeScreen
 import xyz.secozzi.jellyfinmanager.presentation.theme.AppTheme
 import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
 import xyz.secozzi.jellyfinmanager.ui.home.HomeRoute
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryRoute
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryScreen
 import xyz.secozzi.jellyfinmanager.ui.preferences.AppearancePreferencesRoute
 import xyz.secozzi.jellyfinmanager.ui.preferences.AppearancePreferencesScreen
 import xyz.secozzi.jellyfinmanager.ui.preferences.PreferencesRoute
@@ -86,8 +86,8 @@ fun Navigator() {
             composable<ServerRoute> { ServerScreen(it.toRoute<ServerRoute>().id) }
 
             composable<JellyfinEntryRoute>(typeMap = JellyfinEntryRoute.typeMap) {
-                val itemId = it.toRoute<JellyfinEntryRoute>().data.itemId
-                JellyfinEntryScreen(itemId)
+                val itemType = it.toRoute<JellyfinEntryRoute>().data.itemType
+                JellyfinEntryScreen(itemType)
             }
         }
     }

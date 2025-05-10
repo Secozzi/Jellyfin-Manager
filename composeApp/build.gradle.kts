@@ -63,6 +63,7 @@ kotlin {
             implementation(libs.jellyfin.sdk)
             implementation(libs.kmp.uri)
             implementation(libs.bundles.coil)
+            implementation(libs.bundles.serialization.xml)
 
             api(libs.bundles.datastore)
             api(libs.bundles.koin)
@@ -80,6 +81,7 @@ kotlin {
 
     compilerOptions {
         freeCompilerArgs.addAll(
+            "-Xcontext-parameters",
             "-Xexpect-actual-classes",
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
         )

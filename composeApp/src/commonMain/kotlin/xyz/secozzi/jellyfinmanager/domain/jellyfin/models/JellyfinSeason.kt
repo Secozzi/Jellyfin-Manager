@@ -10,6 +10,10 @@ data class JellyfinSeason(
     override val parentId: UUID?,
     override val image: JellyfinImage,
     override val type: BaseItemKind,
+    override val path: String,
+    override val overview: String,
+    override val genres: List<String>,
+    override val studios: List<String>,
 ) : JellyfinItem
 
 fun BaseItemDto.toJellyfinSeason(baseUrl: String): JellyfinSeason {
@@ -19,5 +23,9 @@ fun BaseItemDto.toJellyfinSeason(baseUrl: String): JellyfinSeason {
         parentId = this.parentId,
         image = this.toJellyfinImage(baseUrl),
         type = this.type,
+        path = this.path ?: "",
+        overview = this.overview ?: "",
+        genres = this.genres.orEmpty(),
+        studios = this.studios?.mapNotNull { it.name }.orEmpty(),
     )
 }
