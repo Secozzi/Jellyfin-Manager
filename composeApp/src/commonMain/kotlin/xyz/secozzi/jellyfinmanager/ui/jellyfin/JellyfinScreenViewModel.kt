@@ -3,7 +3,6 @@ package xyz.secozzi.jellyfinmanager.ui.jellyfin
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -12,21 +11,20 @@ import org.jellyfin.sdk.model.api.BaseItemKind
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.JellyfinRepository
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinItem
-import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinUser
+import xyz.secozzi.jellyfinmanager.domain.server.ServerStateHolder
 import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
 import xyz.secozzi.jellyfinmanager.presentation.utils.StateViewModel
-import xyz.secozzi.jellyfinmanager.ui.home.HomeScreenViewModel
 
 class JellyfinScreenViewModel(
     private val jellyfinRepository: JellyfinRepository,
-    private val homeViewModel: HomeScreenViewModel,
+    private val serverStateHolder: ServerStateHolder,
 ) : StateViewModel<RequestState<JellyfinItems>>(RequestState.Idle) {
     private val _itemList = MutableStateFlow<List<Pair<String, UUID?>>>(listOf(Pair("Home", null)))
     val itemList = _itemList.asStateFlow()
 
     init {
         viewModelScope.launch {
-            homeViewModel.selectedServer.collect { selected ->
+            serverStateHolder.selectedServer.collect { selected ->
                 selected?.let(::changeServer)
             }
         }

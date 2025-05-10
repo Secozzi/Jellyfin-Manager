@@ -13,8 +13,6 @@ import nl.adaptivity.xmlutil.serialization.XML
 import okio.IOException
 import xyz.secozzi.jellyfinmanager.data.ssh.SftpWriteFile
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.JellyfinRepository
-import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinMovie
-import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinSeries
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.entry.Genre
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.entry.JellyfinMovieInfo
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.entry.JellyfinSeasonInfo
@@ -22,9 +20,9 @@ import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.entry.JellyfinSeriesIn
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.entry.Plot
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.entry.Studio
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.entry.Title
+import xyz.secozzi.jellyfinmanager.domain.server.ServerStateHolder
 import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
 import xyz.secozzi.jellyfinmanager.presentation.utils.StateViewModel
-import xyz.secozzi.jellyfinmanager.ui.home.HomeScreenViewModel
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinItemType
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryScreenViewModel.JellyfinEntryDetails
 
@@ -33,7 +31,7 @@ class JellyfinEntryScreenViewModel(
     private val xml: XML,
     private val jellyfinRepository: JellyfinRepository,
     private val sftpWriteFile: SftpWriteFile,
-    private val homeViewModel: HomeScreenViewModel,
+    private val serverStateHolder: ServerStateHolder,
 ) : StateViewModel<RequestState<JellyfinEntryDetails>>(RequestState.Idle) {
     val entryRoute = savedStateHandle.toRoute<JellyfinEntryRoute>(
         typeMap = JellyfinEntryRoute.typeMap,
@@ -79,7 +77,7 @@ class JellyfinEntryScreenViewModel(
     }
 
     fun save() {
-        val server = homeViewModel.selectedServer.value ?: return
+        val server = serverStateHolder.selectedServer.value ?: return
         val data = mutableState.value.getSuccessData()
         val itemPath = data.path
 
@@ -89,7 +87,6 @@ class JellyfinEntryScreenViewModel(
             JellyfinItemType.Series -> "$itemPath/tvshow.nfo"
         }
         val nfoContent = generateXmlString(data, entryRoute.data.itemType)
-        println(nfoContent)
 
         _saveState.update { _ -> SaveState.Loading }
         try {

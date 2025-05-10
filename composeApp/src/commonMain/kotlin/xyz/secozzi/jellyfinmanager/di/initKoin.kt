@@ -8,6 +8,7 @@ fun initKoin(
 ) = module {
     includes(
         PreferencesModule(datastorePath),
+        StateHolderModule,
         DatabaseModule,
         SSHModule,
         SerializationModule,

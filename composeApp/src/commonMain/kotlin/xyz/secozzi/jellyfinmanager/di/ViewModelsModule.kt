@@ -11,7 +11,7 @@ import xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.ServerListScreenVie
 import xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.server.ServerScreenViewModel
 
 val ViewModelsModule = module {
-    singleOf(::HomeScreenViewModel)
+    factoryOf(::HomeScreenViewModel)
     factoryOf(::ServerListScreenViewModel)
     factoryOf(::SSHScreenViewModel)
     factoryOf(::JellyfinScreenViewModel)

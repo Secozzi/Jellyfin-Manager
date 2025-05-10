@@ -10,12 +10,12 @@ import net.schmizz.sshj.SSHClient
 import xyz.secozzi.jellyfinmanager.data.ssh.ExecuteSSH
 import xyz.secozzi.jellyfinmanager.data.ssh.GetSSHClient
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
+import xyz.secozzi.jellyfinmanager.domain.server.ServerStateHolder
 import xyz.secozzi.jellyfinmanager.domain.ssh.GetDirectories
 import xyz.secozzi.jellyfinmanager.domain.ssh.model.Directory
 import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
 import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState.Companion.toRequestState
 import xyz.secozzi.jellyfinmanager.presentation.utils.StateViewModel
-import xyz.secozzi.jellyfinmanager.ui.home.HomeScreenViewModel
 import java.io.IOException
 
 sealed interface SSHDialogs {
@@ -27,7 +27,7 @@ class SSHScreenViewModel(
     private val getSSHClient: GetSSHClient,
     private val getDirectories: GetDirectories,
     private val executeSSH: ExecuteSSH,
-    private val homeViewModel: HomeScreenViewModel,
+    private val serverStateHolder: ServerStateHolder,
 ) : StateViewModel<RequestState<List<Directory>>>(RequestState.Idle) {
 
     private val currentServer = MutableStateFlow<Server?>(null)
@@ -46,7 +46,7 @@ class SSHScreenViewModel(
 
     init {
         viewModelScope.launch {
-            homeViewModel.selectedServer.collect { selected ->
+            serverStateHolder.selectedServer.collect { selected ->
                 selected?.let(::changeServer)
             }
         }
