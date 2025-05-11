@@ -18,6 +18,9 @@ class HomeScreenViewModel(
 ) : ViewModel() {
     val selectedServer = serverStateHolder.selectedServer
 
+    private val _isLoaded = MutableStateFlow(false)
+    val isLoaded = _isLoaded.asStateFlow()
+
     fun selectServer(server: Server) {
         serverStateHolder.updateServer(server)
     }
@@ -28,6 +31,7 @@ class HomeScreenViewModel(
     init {
         viewModelScope.launch {
             serverUseCase.getServers().collectLatest { servers ->
+                _isLoaded.update { _ -> true }
                 serverStateHolder.updateServer(servers.firstOrNull())
                 _state.update { _ ->
                     servers.takeIf { it.isNotEmpty() }?.let { RequestState.Success(it) }
