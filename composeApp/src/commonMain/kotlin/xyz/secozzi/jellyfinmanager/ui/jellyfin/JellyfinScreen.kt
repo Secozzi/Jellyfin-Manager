@@ -5,6 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.backhandler.BackHandler
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.koin.compose.viewmodel.koinViewModel
@@ -22,7 +23,7 @@ fun JellyfinScreen() {
     val navigator = LocalNavController.current
     val viewModel = koinViewModel<JellyfinScreenViewModel>()
 
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val itemList by viewModel.itemList.collectAsState()
 
     BackHandler(itemList.size > 1) {

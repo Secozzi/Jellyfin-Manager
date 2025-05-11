@@ -8,6 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.backhandler.BackHandler
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import dev.materii.pullrefresh.rememberPullRefreshState
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +27,7 @@ data object SSHRoute
 fun SSHScreen() {
     val viewModel = koinViewModel<SSHScreenViewModel>()
 
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val dialogShown by viewModel.dialogShown.collectAsState()
     val pathList by viewModel.pathList.collectAsState()
 

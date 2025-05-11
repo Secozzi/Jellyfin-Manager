@@ -1,11 +1,19 @@
 package xyz.secozzi.jellyfinmanager.ui.jellyfin.entry
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
@@ -13,6 +21,7 @@ import nl.adaptivity.xmlutil.serialization.XML
 import okio.IOException
 import xyz.secozzi.jellyfinmanager.data.ssh.SftpWriteFile
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.JellyfinRepository
+import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinItem
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.entry.Genre
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.entry.JellyfinMovieInfo
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.entry.JellyfinSeasonInfo
@@ -22,9 +31,9 @@ import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.entry.Studio
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.entry.Title
 import xyz.secozzi.jellyfinmanager.domain.server.ServerStateHolder
 import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
-import xyz.secozzi.jellyfinmanager.presentation.utils.StateViewModel
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinItemType
-import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryScreenViewModel.JellyfinEntryDetails
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryScreenViewModel.JellyfinEntryDetails.Companion.toEntryDetails
+import kotlin.time.Duration.Companion.seconds
 
 class JellyfinEntryScreenViewModel(
     savedStateHandle: SavedStateHandle,
@@ -32,7 +41,7 @@ class JellyfinEntryScreenViewModel(
     private val jellyfinRepository: JellyfinRepository,
     private val sftpWriteFile: SftpWriteFile,
     private val serverStateHolder: ServerStateHolder,
-) : StateViewModel<RequestState<JellyfinEntryDetails>>(RequestState.Idle) {
+) : ViewModel() {
     val entryRoute = savedStateHandle.toRoute<JellyfinEntryRoute>(
         typeMap = JellyfinEntryRoute.typeMap,
     )
@@ -40,26 +49,31 @@ class JellyfinEntryScreenViewModel(
     private val _saveState = MutableStateFlow<SaveState>(SaveState.Idle)
     val saveState = _saveState.asStateFlow()
 
-    init {
-        viewModelScope.launch(Dispatchers.IO) {
-            val item = jellyfinRepository.getItem(entryRoute.data.itemId)
+    private val _details = MutableStateFlow<JellyfinEntryDetails>(JellyfinEntryDetails.EMPTY)
+    val details = _details.asStateFlow()
 
-            mutableState.update { _ ->
-                item?.let {
-                    RequestState.Success(
-                        JellyfinEntryDetails(
-                            title = it.name,
-                            titleList = listOf(it.name),
-                            studio = it.studios.joinToString(),
-                            description = it.overview,
-                            genre = it.genres.joinToString(),
-                            path = it.path,
-                        )
-                    )
-                } ?: RequestState.Error(Exception("Unable to retrieve item"))
-            }
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+    val state = flow {
+        val item = try {
+            jellyfinRepository.getItem(entryRoute.data.itemId)
+        } catch (e: Exception) {
+            null
         }
+
+        emit(item)
     }
+        .onEach { item ->
+            item?.let { _details.update { _ -> it.toEntryDetails() } }
+        }
+        .mapLatest { item ->
+            item?.let { RequestState.Success(it) }
+                ?: RequestState.Error(Exception("Unable to retrieve item"))
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5.seconds),
+            initialValue = RequestState.Idle,
+        )
 
     private fun generateXmlString(data: JellyfinEntryDetails, type: JellyfinItemType): String {
         val title = Title(data.title)
@@ -78,7 +92,7 @@ class JellyfinEntryScreenViewModel(
 
     fun save() {
         val server = serverStateHolder.selectedServer.value ?: return
-        val data = mutableState.value.getSuccessData()
+        val data = details.value
         val itemPath = data.path
 
         val nfoPath = when (entryRoute.data.itemType) {
@@ -104,41 +118,33 @@ class JellyfinEntryScreenViewModel(
     }
 
     fun onTitleChange(value: String) {
-        mutableState.update { state ->
-            RequestState.Success(
-                (state as RequestState.Success).data.copy(
-                    title = value,
-                )
+        _details.update { details ->
+            details.copy(
+                title = value
             )
         }
     }
 
     fun onStudioChange(value: String) {
-        mutableState.update { state ->
-            RequestState.Success(
-                (state as RequestState.Success).data.copy(
-                    studio = value,
-                )
+        _details.update { details ->
+            details.copy(
+                studio = value
             )
         }
     }
 
     fun onDescriptionChange(value: String) {
-        mutableState.update { state ->
-            RequestState.Success(
-                (state as RequestState.Success).data.copy(
-                    description = value,
-                )
+        _details.update { details ->
+            details.copy(
+                description = value
             )
         }
     }
 
     fun onGenreChange(value: String) {
-        mutableState.update { state ->
-            RequestState.Success(
-                (state as RequestState.Success).data.copy(
-                    genre = value,
-                )
+        _details.update { details ->
+            details.copy(
+                genre = value
             )
         }
     }
@@ -150,7 +156,27 @@ class JellyfinEntryScreenViewModel(
         val description: String,
         val genre: String,
         val path: String,
-    )
+    ) {
+        companion object {
+            fun JellyfinItem.toEntryDetails() = JellyfinEntryDetails(
+                title = this.name,
+                titleList = listOf(this.name),
+                studio = this.studios.joinToString(),
+                description = this.overview,
+                genre = this.genres.joinToString(),
+                path = this.path,
+            )
+
+            val EMPTY = JellyfinEntryDetails(
+                title = "",
+                titleList = emptyList(),
+                studio = "",
+                description = "",
+                genre = "",
+                path = "",
+            )
+        }
+    }
 
     enum class SaveState {
         Idle,

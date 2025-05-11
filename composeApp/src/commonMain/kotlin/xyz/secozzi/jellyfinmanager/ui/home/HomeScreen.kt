@@ -75,7 +75,7 @@ fun HomeScreen() {
         topBar = {
             TopAppBar(
                 title = {
-                    state.getSuccessDataOrNull()?.takeIf { it.isNotEmpty() }?.let { serverList ->
+                    state.getSuccessDataOrNull()?.let { serverList ->
                         DropDown(
                             server = selectedServer!!,
                             values = serverList.toPersistentList(),
@@ -92,7 +92,7 @@ fun HomeScreen() {
         },
         bottomBar = {
             AnimatedVisibility(
-                visible = state.getSuccessDataOrNull()?.isNotEmpty() == true,
+                visible = state.isSuccess(),
                 enter = fadeIn(tween(300)),
                 exit = fadeOut(tween(300)),
             ) {
@@ -146,7 +146,7 @@ private fun HomeScreenContent(
             state.isIdle() || state.isLoading() -> {
                 LoadingScreenContent()
             }
-            state.getSuccessData().isEmpty() -> {
+            state.isError() -> {
                 NoServerContent(
                     onClick = { navigator.navigate(ServerRoute(null)) },
                 )

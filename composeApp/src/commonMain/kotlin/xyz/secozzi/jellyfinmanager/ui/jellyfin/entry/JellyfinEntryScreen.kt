@@ -24,6 +24,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.UUID
 import org.jellyfin.sdk.model.serializer.UUIDSerializer
@@ -61,8 +62,9 @@ fun JellyfinEntryScreen(type: JellyfinItemType) {
     val navigator = LocalNavController.current
     val viewModel = koinViewModel<JellyfinEntryScreenViewModel>()
 
-    val state by viewModel.state.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val saveState by viewModel.saveState.collectAsState()
+    val item by viewModel.details.collectAsState()
 
     Scaffold(
         topBar = {
@@ -120,10 +122,8 @@ fun JellyfinEntryScreen(type: JellyfinItemType) {
             return@Scaffold
         }
 
-        val item = state.getSuccessData()
         JellyfinEntryScreenContent(
             item = item,
-            type = type,
             onTitleChange = viewModel::onTitleChange,
             onStudioChange = viewModel::onStudioChange,
             onDescriptionChange = viewModel::onDescriptionChange,

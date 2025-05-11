@@ -20,7 +20,6 @@ import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 @Composable
 fun JellyfinEntryScreenContent(
     item: JellyfinEntryDetails,
-    type: JellyfinItemType,
     onTitleChange: (String) -> Unit,
     onStudioChange: (String) -> Unit,
     onDescriptionChange: (String) -> Unit,
@@ -29,7 +28,11 @@ fun JellyfinEntryScreenContent(
 ) {
     Column(
         modifier = modifier
-            .padding(horizontal = MaterialTheme.spacing.medium)
+            .padding(
+                start = MaterialTheme.spacing.medium,
+                end = MaterialTheme.spacing.medium,
+                bottom = MaterialTheme.spacing.medium,
+            )
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
     ) {

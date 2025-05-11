@@ -1,51 +1,102 @@
 package xyz.secozzi.jellyfinmanager.ui.jellyfin
 
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.UUID
-import org.jellyfin.sdk.model.api.BaseItemKind
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.JellyfinRepository
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinItem
 import xyz.secozzi.jellyfinmanager.domain.server.ServerStateHolder
 import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
-import xyz.secozzi.jellyfinmanager.presentation.utils.StateViewModel
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
+
+typealias ItemList = List<Pair<String, UUID?>>
 
 class JellyfinScreenViewModel(
     private val jellyfinRepository: JellyfinRepository,
     private val serverStateHolder: ServerStateHolder,
-) : StateViewModel<RequestState<JellyfinItems>>(RequestState.Idle) {
-    private val _itemList = MutableStateFlow<List<Pair<String, UUID?>>>(listOf(Pair("Home", null)))
+) : ViewModel() {
+    private val hasInitializedServer = MutableStateFlow(false)
+    private val serverFlow = MutableStateFlow<Server?>(null)
+    private val refreshFlow = MutableSharedFlow<Unit>()
+
+    private val _itemList = MutableStateFlow<ItemList>(listOf(Pair("Home", null)))
     val itemList = _itemList.asStateFlow()
+
+    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
+    val state = combine(
+        serverFlow.filterNotNull(),
+        _itemList,
+        refreshFlow.onStart { emit(Unit) },
+    ) { server, itemList, _ ->
+        server to itemList
+    }
+        .debounce(50.milliseconds)
+        .flatMapLatest { (server, itemList) ->
+            flow {
+                emit(RequestState.Loading)
+
+                if (!hasInitializedServer.value) {
+                    jellyfinRepository.loadServer(server)
+                    hasInitializedServer.update { _ -> true }
+                }
+
+                val items = getLibraries(itemList)
+                emit(items)
+            }
+        }
+        .catch { emit(RequestState.Error(it)) }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5.seconds),
+            initialValue = RequestState.Idle,
+        )
 
     init {
         viewModelScope.launch {
-            serverStateHolder.selectedServer.collect { selected ->
-                selected?.let(::changeServer)
+            serverStateHolder.selectedServer.filterNotNull().collectLatest { selected ->
+                hasInitializedServer.update { _ -> false }
+                _itemList.update { _ -> listOf(Pair("Home", null)) }
+
+                serverFlow.update { _ -> selected }
             }
         }
     }
 
-    fun changeServer(server: Server?) {
-        mutableState.update { _ -> RequestState.Loading }
-
-        server?.let { s ->
-            viewModelScope.launch {
-                jellyfinRepository.loadServer(s)
-                _itemList.update { _ -> listOf(Pair("Home", null)) }
-
-                val libraries = jellyfinRepository.getLibraries()
-                mutableState.update { _ ->
-                    RequestState.Success(
-                        JellyfinItems.Libraries(libraries)
-                    )
+    private suspend fun getLibraries(itemList: ItemList): RequestState<JellyfinItems> {
+        val items = when (itemList.size) {
+            1 -> JellyfinItems.Libraries(jellyfinRepository.getLibraries())
+            else -> {
+                val items = jellyfinRepository.getItems(itemList.last().second)
+                if (itemList.size == 2) {
+                    JellyfinItems.Series(items)
+                } else {
+                    JellyfinItems.Seasons(items)
                 }
             }
         }
+        return RequestState.Success(items)
     }
 
     fun onNavigateTo(index: Int) {
@@ -53,52 +104,11 @@ class JellyfinScreenViewModel(
             return
         }
 
-        mutableState.update { _ -> RequestState.Loading }
         _itemList.update { i -> i.subList(0, index + 1) }
-
-        viewModelScope.launch {
-            when (itemList.value.size) {
-                1 -> {
-                    val libraries = jellyfinRepository.getLibraries()
-                    mutableState.update { _ ->
-                        RequestState.Success(
-                            JellyfinItems.Libraries(libraries)
-                        )
-                    }
-                }
-                else -> {
-                    val currentItem = itemList.value.last()
-                    val items = jellyfinRepository.getItems(currentItem.second)
-                    mutableState.update { _ ->
-                        RequestState.Success(
-                            if (itemList.value.size == 2) {
-                                JellyfinItems.Series(items)
-                            } else {
-                                JellyfinItems.Seasons(items)
-                            }
-                        )
-                    }
-                }
-            }
-        }
     }
 
     fun onClickItem(item: JellyfinItem) {
-        mutableState.update { _ -> RequestState.Loading }
         _itemList.update { i -> i + Pair(item.name, item.id) }
-
-        viewModelScope.launch {
-            val items = jellyfinRepository.getItems(item.id)
-            mutableState.update { _ ->
-                when (item.type) {
-                    BaseItemKind.COLLECTION_FOLDER -> RequestState.Success(JellyfinItems.Series(items))
-                    BaseItemKind.SERIES -> RequestState.Success(JellyfinItems.Seasons(items))
-                    BaseItemKind.SEASON -> RequestState.Success(JellyfinItems.Episodes(items, item))
-                    BaseItemKind.MOVIE -> RequestState.Success(JellyfinItems.Episodes(items, item))
-                    else -> RequestState.Error(Throwable("Invalid type"))
-                }
-            }
-        }
     }
 }
 
@@ -106,11 +116,6 @@ sealed class JellyfinItems(open val items: List<JellyfinItem>) {
     data class Libraries(override val items: List<JellyfinItem>) : JellyfinItems(items)
     data class Series(override val items: List<JellyfinItem>) : JellyfinItems(items)
     data class Seasons(override val items: List<JellyfinItem>) : JellyfinItems(items)
-
-    data class Episodes(
-        override val items: List<JellyfinItem>,
-        val item: JellyfinItem,
-    ) : JellyfinItems(items)
 }
 
 @Serializable

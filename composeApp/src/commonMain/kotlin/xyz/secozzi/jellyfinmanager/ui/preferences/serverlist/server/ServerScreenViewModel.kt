@@ -2,28 +2,23 @@ package xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.server
 
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.usecase.ServerUseCase
-import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
-import xyz.secozzi.jellyfinmanager.presentation.utils.StateViewModel
 
 class ServerScreenViewModel(
     private val savedStateHandle: SavedStateHandle,
     private val serverUseCase: ServerUseCase,
-) : StateViewModel<ServerScreenViewModel.State>(State.Loading) {
+) : ViewModel() {
     private val serverRoute = savedStateHandle.toRoute<ServerRoute>()
 
     private val _server = MutableStateFlow<Server>(Server.getUninitializedServer())
@@ -32,8 +27,11 @@ class ServerScreenViewModel(
     private val _serverNames = MutableStateFlow<List<String>>(emptyList())
     val serverNames = _serverNames.asStateFlow()
 
+    private val _state = MutableStateFlow<State>(State.Loading)
+    val state = _state.asStateFlow()
+
     init {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             serverUseCase.getServers().take(1).collectLatest { servers ->
                 servers.firstOrNull { it.id == serverRoute.id }?.let {
                     _server.update { _ -> it }
@@ -43,7 +41,7 @@ class ServerScreenViewModel(
                     servers.filterNot { it.id == serverRoute.id }.map { it.name }
                 }
 
-                mutableState.update { _ -> State.Success(State.SaveState.Idle) }
+                _state.update { _ -> State.Success(State.SaveState.Idle) }
             }
         }
     }
@@ -77,6 +75,7 @@ class ServerScreenViewModel(
 
     fun onSSHPortChange(value: String) {
         _server.update { s -> s.copy(sshPort = value.toLongOrNull() ?: 0L) }
+        updateIsValid()
     }
 
     fun onSSHHostnameChange(value: String) {
@@ -136,9 +135,9 @@ class ServerScreenViewModel(
                     )
                 )
 
-                mutableState.update { _ -> State.Success(State.SaveState.Success) }
+                _state.update { _ -> State.Success(State.SaveState.Success) }
             } catch (e: Exception) {
-                mutableState.update { _ -> State.Success(State.SaveState.Error) }
+                _state.update { _ -> State.Success(State.SaveState.Error) }
             }
         }
     }
