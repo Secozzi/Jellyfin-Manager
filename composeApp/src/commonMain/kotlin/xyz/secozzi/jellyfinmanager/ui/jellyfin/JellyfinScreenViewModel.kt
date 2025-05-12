@@ -2,23 +2,12 @@ package xyz.secozzi.jellyfinmanager.ui.jellyfin
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -28,8 +17,8 @@ import xyz.secozzi.jellyfinmanager.domain.jellyfin.JellyfinRepository
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinItem
 import xyz.secozzi.jellyfinmanager.domain.server.ServerStateHolder
 import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
+import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState.Companion.asStateFlow
+import xyz.secozzi.jellyfinmanager.presentation.utils.combineRefreshable
 
 typealias ItemList = List<Pair<String, UUID?>>
 
@@ -38,48 +27,34 @@ class JellyfinScreenViewModel(
     private val serverStateHolder: ServerStateHolder,
 ) : ViewModel() {
     private val hasInitializedServer = MutableStateFlow(false)
-    private val serverFlow = MutableStateFlow<Server?>(null)
     private val refreshFlow = MutableSharedFlow<Unit>()
 
-    private val _itemList = MutableStateFlow<ItemList>(listOf(Pair("Home", null)))
-    val itemList = _itemList.asStateFlow()
+    private val _jfData = MutableStateFlow<JellyfinVMData>(JellyfinVMData.EMPTY)
+    val jfData = _jfData.asStateFlow()
 
-    @OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
-    val state = combine(
-        serverFlow.filterNotNull(),
-        _itemList,
-        refreshFlow.onStart { emit(Unit) },
-    ) { server, itemList, _ ->
-        server to itemList
-    }
-        .debounce(50.milliseconds)
-        .flatMapLatest { (server, itemList) ->
-            flow {
-                emit(RequestState.Loading)
-
-                if (!hasInitializedServer.value) {
-                    jellyfinRepository.loadServer(server)
-                    hasInitializedServer.update { _ -> true }
-                }
-
-                val items = getLibraries(itemList)
-                emit(items)
-            }
+    val state = combineRefreshable(
+        jfData.filter { it.server != null },
+        refreshFlow,
+    ) { jfData ->
+        if (!hasInitializedServer.value) {
+            jellyfinRepository.loadServer(jfData.server!!)
+            hasInitializedServer.update { _ -> true }
         }
-        .catch { emit(RequestState.Error(it)) }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5.seconds),
-            initialValue = RequestState.Idle,
-        )
+
+        getLibraries(jfData.itemList)
+    }.asStateFlow()
 
     init {
         viewModelScope.launch {
             serverStateHolder.selectedServer.filterNotNull().collectLatest { selected ->
                 hasInitializedServer.update { _ -> false }
-                _itemList.update { _ -> listOf(Pair("Home", null)) }
 
-                serverFlow.update { _ -> selected }
+                _jfData.update { _ ->
+                    JellyfinVMData(
+                        server = selected,
+                        itemList = listOf(Pair("Home", null)),
+                    )
+                }
             }
         }
     }
@@ -100,15 +75,35 @@ class JellyfinScreenViewModel(
     }
 
     fun onNavigateTo(index: Int) {
-        if (index == itemList.value.lastIndex) {
+        if (index == jfData.value.itemList.lastIndex) {
             return
         }
 
-        _itemList.update { i -> i.subList(0, index + 1) }
+        _jfData.update { data ->
+            data.copy(
+                itemList = data.itemList.subList(0, index + 1),
+            )
+        }
     }
 
     fun onClickItem(item: JellyfinItem) {
-        _itemList.update { i -> i + Pair(item.name, item.id) }
+        _jfData.update { data ->
+            data.copy(
+                itemList = data.itemList + Pair(item.name, item.id),
+            )
+        }
+    }
+
+    data class JellyfinVMData(
+        val server: Server?,
+        val itemList: ItemList,
+    ) {
+        companion object {
+            val EMPTY = JellyfinVMData(
+                server = null,
+                itemList = emptyList(),
+            )
+        }
     }
 }
 

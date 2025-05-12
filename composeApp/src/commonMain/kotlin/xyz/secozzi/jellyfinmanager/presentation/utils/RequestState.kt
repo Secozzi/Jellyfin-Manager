@@ -10,11 +10,23 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.WhileSubscribed
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
+import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState.Error
+import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState.Loading
+import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState.Success
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 // https://gist.github.com/stevdza-san/cca20eff9f2c4c7d783ffd0a0061b352
 sealed class RequestState<out T> {
@@ -79,24 +91,10 @@ sealed class RequestState<out T> {
     }
 
     companion object {
-        fun <T> fromNetworkRequest(
-            onSuccess: suspend (T) -> Unit = {},
-            getData: suspend () -> T,
-        ): Flow<RequestState<T>> = flow {
-            emit(Loading)
-            try {
-                val result = getData()
-                emit(Success(result))
-                onSuccess(result)
-            } catch (e: Throwable) {
-                emit(Error(e))
-            }
-        }
-
         context(viewModel: ViewModel)
         fun <T> Flow<RequestState<T>>.asStateFlow(
             scope: CoroutineScope = viewModel.viewModelScope,
-            started: SharingStarted = SharingStarted.WhileSubscribed(5000),
+            started: SharingStarted = SharingStarted.WhileSubscribed(5.seconds),
             initialValue: RequestState<T> = Idle,
         ): StateFlow<RequestState<T>> = this.stateIn(
             scope = scope,
@@ -113,3 +111,27 @@ sealed class RequestState<out T> {
         }
     }
 }
+
+@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
+@Suppress("UNCHECKED_CAST")
+fun <T, R> combineRefreshable(
+    flow: Flow<T>,
+    flow2: Flow<Unit>,
+    getResult: suspend (T) -> RequestState<R>,
+): Flow<RequestState<R>> = combine(
+    flow,
+    flow2.onStart { emit(Unit) },
+) { args: Array<*> ->
+    args[0] as T
+}
+    .flatMapLatest { data ->
+        flow {
+            emit(Loading)
+            try {
+                val result = getResult(data)
+                emit(result)
+            } catch (e: Exception) {
+                emit(Error(e))
+            }
+        }
+    }

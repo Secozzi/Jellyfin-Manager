@@ -1,6 +1,7 @@
 package xyz.secozzi.jellyfinmanager.ui.ssh
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -10,6 +11,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.backhandler.BackHandler
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
+import com.dokar.sonner.Toaster
 import dev.materii.pullrefresh.rememberPullRefreshState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,6 +20,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import xyz.secozzi.jellyfinmanager.presentation.components.ConfirmDialog
 import xyz.secozzi.jellyfinmanager.presentation.components.EditTextDialog
 import xyz.secozzi.jellyfinmanager.presentation.ssh.SSHScreenContent
+import xyz.secozzi.jellyfinmanager.ui.providers.LocalToaster
 
 @Serializable
 data object SSHRoute
@@ -25,11 +28,17 @@ data object SSHRoute
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun SSHScreen() {
+    val toaster = LocalToaster.current
     val viewModel = koinViewModel<SSHScreenViewModel>()
 
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val toasterEvent by viewModel.toasterEvent.collectAsStateWithLifecycle(null)
     val dialogShown by viewModel.dialogShown.collectAsState()
-    val pathList by viewModel.pathList.collectAsState()
+    val sshData by viewModel.sshData.collectAsState()
+
+    LaunchedEffect(toasterEvent) {
+        toasterEvent?.let { toaster.show(it) }
+    }
 
     var isRefreshing by remember { mutableStateOf(false) }
     val ptrState = rememberPullRefreshState(
@@ -43,8 +52,10 @@ fun SSHScreen() {
         },
     )
 
-    BackHandler(pathList.size > 1) {
-        viewModel.onNavigateTo(pathList.size - 2)
+    Toaster(state = toaster)
+
+    BackHandler(sshData.pathList.size > 1) {
+        viewModel.onNavigateTo(sshData.pathList.size - 2)
     }
 
     when (dialogShown) {
@@ -76,7 +87,7 @@ fun SSHScreen() {
 
     SSHScreenContent(
         state = state,
-        pathList = pathList,
+        pathList = sshData.pathList,
         ptrState = ptrState,
         onNavigateTo = viewModel::onNavigateTo,
         onClickDirectory = viewModel::onClickDirectory,

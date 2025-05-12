@@ -7,13 +7,10 @@ import androidx.navigation.toRoute
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
@@ -31,9 +28,9 @@ import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.entry.Studio
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.entry.Title
 import xyz.secozzi.jellyfinmanager.domain.server.ServerStateHolder
 import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
+import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState.Companion.asStateFlow
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinItemType
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryScreenViewModel.JellyfinEntryDetails.Companion.toEntryDetails
-import kotlin.time.Duration.Companion.seconds
 
 class JellyfinEntryScreenViewModel(
     savedStateHandle: SavedStateHandle,
@@ -56,7 +53,7 @@ class JellyfinEntryScreenViewModel(
     val state = flow {
         val item = try {
             jellyfinRepository.getItem(entryRoute.data.itemId)
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
 
@@ -69,11 +66,7 @@ class JellyfinEntryScreenViewModel(
             item?.let { RequestState.Success(it) }
                 ?: RequestState.Error(Exception("Unable to retrieve item"))
         }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5.seconds),
-            initialValue = RequestState.Idle,
-        )
+        .asStateFlow()
 
     private fun generateXmlString(data: JellyfinEntryDetails, type: JellyfinItemType): String {
         val title = Title(data.title)

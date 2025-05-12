@@ -62,6 +62,7 @@ kotlin {
             implementation(libs.compose.ptr)
             implementation(libs.jellyfin.sdk)
             implementation(libs.kmp.uri)
+            implementation(libs.sonner)
             implementation(libs.bundles.coil)
             implementation(libs.bundles.serialization.xml)
 

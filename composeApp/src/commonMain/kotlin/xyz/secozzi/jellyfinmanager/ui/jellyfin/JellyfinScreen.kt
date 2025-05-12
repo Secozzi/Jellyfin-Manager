@@ -24,15 +24,15 @@ fun JellyfinScreen() {
     val viewModel = koinViewModel<JellyfinScreenViewModel>()
 
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val itemList by viewModel.itemList.collectAsState()
+    val jfData by viewModel.jfData.collectAsState()
 
-    BackHandler(itemList.size > 1) {
-        viewModel.onNavigateTo(itemList.size - 2)
+    BackHandler(jfData.itemList.size > 1) {
+        viewModel.onNavigateTo(jfData.itemList.size - 2)
     }
 
     JellyfinScreenContent(
         state = state,
-        itemList = itemList,
+        itemList = jfData.itemList,
         onNavigateTo = viewModel::onNavigateTo,
         onClickItem = {
             when (it.type) {

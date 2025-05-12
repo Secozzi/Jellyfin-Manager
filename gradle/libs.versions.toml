@@ -29,6 +29,7 @@ jellyfin = "1.6.8"
 kmp-uri = "0.0.19"
 coil = "3.1.0"
 xml-serialization = "0.91.0"
+sonner = "0.3.8"
 
 [libraries]
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3-android" }
@@ -75,6 +76,8 @@ coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version
 
 xml-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xml-serialization" }
 xml-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", version.ref = "xml-serialization" }
+
+sonner = { module = "io.github.dokar3:sonner", version.ref = "sonner" }
 
 [bundles]
 datastore = ["datastore-core", "datastore-preferences"]

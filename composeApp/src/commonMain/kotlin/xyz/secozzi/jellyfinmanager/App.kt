@@ -19,9 +19,11 @@ import androidx.navigation.toRoute
 import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.request.crossfade
+import com.dokar.sonner.rememberToasterState
 import xyz.secozzi.jellyfinmanager.ui.home.HomeScreen
 import xyz.secozzi.jellyfinmanager.presentation.theme.AppTheme
 import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
+import xyz.secozzi.jellyfinmanager.ui.providers.LocalToaster
 import xyz.secozzi.jellyfinmanager.ui.home.HomeRoute
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryRoute
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryScreen
@@ -49,7 +51,11 @@ fun App() {
 
 @Composable
 fun Navigator() {
-    CompositionLocalProvider(LocalNavController provides rememberNavController()) {
+    val toastState = rememberToasterState()
+    CompositionLocalProvider(
+        LocalNavController provides rememberNavController(),
+        LocalToaster provides toastState,
+    ) {
         NavHost(
             navController = LocalNavController.current,
             startDestination = HomeRoute,
