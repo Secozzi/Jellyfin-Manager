@@ -2,7 +2,6 @@ package xyz.secozzi.jellyfinmanager.presentation.jellyfin
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import org.jellyfin.sdk.model.UUID
@@ -12,44 +11,41 @@ import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreenContent
 import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreenContent
 import xyz.secozzi.jellyfinmanager.presentation.ssh.components.PathLevelIndication
 import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
-import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinItems
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinScreenViewModel.JellyfinItemList
 
-@Suppress("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun JellyfinScreenContent(
-    state: RequestState<JellyfinItems>,
+    state: RequestState<JellyfinItemList>,
     itemList: List<Pair<String, UUID?>>,
     onNavigateTo: (Int) -> Unit,
     onClickItem: (JellyfinItem) -> Unit,
+    onClickEditSeries: () -> Unit,
 ) {
-    Scaffold(
-        floatingActionButton = {},
-    ) {
-        Column {
-            PathLevelIndication(
-                pathList = itemList.map { it.first },
-                onNavigateTo = onNavigateTo,
-            )
+    Column {
+        PathLevelIndication(
+            pathList = itemList.map { it.first },
+            onNavigateTo = onNavigateTo,
+        )
 
-            if (state.isLoading() || state.isIdle()) {
-                LoadingScreenContent()
-                return@Scaffold
-            }
-
-            if (state.isError()) {
-                ErrorScreenContent(
-                    error = state.getError(),
-                    modifier = Modifier.fillMaxSize(),
-                )
-                return@Scaffold
-            }
-
-            val jellyfinItems = state.getSuccessData()
-
-            JellyfinBrowseScreen(
-                jellyfinItems = jellyfinItems,
-                onClickItem = onClickItem,
-            )
+        if (state.isLoading() || state.isIdle()) {
+            LoadingScreenContent()
+            return@Column
         }
+
+        if (state.isError()) {
+            ErrorScreenContent(
+                error = state.getError(),
+                modifier = Modifier.fillMaxSize(),
+            )
+            return@Column
+        }
+
+        val jellyfinItems = state.getSuccessData()
+
+        JellyfinBrowseScreen(
+            jellyfinItems = jellyfinItems,
+            onClickItem = onClickItem,
+            onClickEditSeries = onClickEditSeries,
+        )
     }
 }

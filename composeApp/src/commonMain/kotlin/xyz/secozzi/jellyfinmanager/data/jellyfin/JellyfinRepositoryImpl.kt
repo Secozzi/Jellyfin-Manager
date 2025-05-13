@@ -4,12 +4,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.api.client.ApiClient
 import org.jellyfin.sdk.api.client.extensions.authenticateUserByName
+import org.jellyfin.sdk.api.client.extensions.itemUpdateApi
 import org.jellyfin.sdk.api.client.extensions.itemsApi
 import org.jellyfin.sdk.api.client.extensions.userApi
 import org.jellyfin.sdk.api.client.extensions.userLibraryApi
 import org.jellyfin.sdk.model.UUID
+import org.jellyfin.sdk.model.api.BaseItemDto
+import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.ItemFields
 import org.jellyfin.sdk.model.api.ItemSortBy
+import org.jellyfin.sdk.model.api.NameGuidPair
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.JellyfinRepository
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinCollection
@@ -74,14 +78,21 @@ class JellyfinRepositoryImpl(
         }
     }
 
-    override suspend fun getItem(id: UUID): JellyfinItem? {
-        val baseUrl = apiClient.baseUrl!!
-
+    override suspend fun getItem(id: UUID): BaseItemDto {
         return withContext(Dispatchers.IO) {
             apiClient.userLibraryApi.getItem(
                 itemId = id,
                 userId = jellyfinUser.id,
-            ).content.toJellyfinItem(baseUrl)
+            ).content
+        }
+    }
+
+    override suspend fun updateItem(id: UUID, type: BaseItemKind, item: BaseItemDto) {
+        withContext(Dispatchers.IO) {
+            apiClient.itemUpdateApi.updateItem(
+                itemId = id,
+                data = item,
+            )
         }
     }
 }

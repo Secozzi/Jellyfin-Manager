@@ -11,6 +11,7 @@ import org.jellyfin.sdk.model.api.BaseItemKind
 import org.koin.compose.viewmodel.koinViewModel
 import xyz.secozzi.jellyfinmanager.presentation.jellyfin.JellyfinScreenContent
 import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
+import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryRoute
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryRouteData
 
@@ -40,7 +41,7 @@ fun JellyfinScreen() {
                     route = JellyfinEntryRoute(
                         data = JellyfinEntryRouteData(
                             itemId = it.id,
-                            itemType = JellyfinItemType.Movie,
+                            itemType = JellyfinScreenViewModel.JellyfinItemType.Movie,
                         )
                     )
                 )
@@ -48,12 +49,26 @@ fun JellyfinScreen() {
                     route = JellyfinEntryRoute(
                         data = JellyfinEntryRouteData(
                             itemId = it.id,
-                            itemType = JellyfinItemType.Season,
+                            itemType = JellyfinScreenViewModel.JellyfinItemType.Season,
                         )
                     )
                 )
                 else -> viewModel.onClickItem(it)
             }
+        },
+        onClickEditSeries = {
+            val id = (
+                (state as RequestState.Success).data as JellyfinScreenViewModel.JellyfinItemList.Seasons
+            ).seriesId
+
+            navigator.navigate(
+                route = JellyfinEntryRoute(
+                    data = JellyfinEntryRouteData(
+                        itemId = id,
+                        itemType = JellyfinScreenViewModel.JellyfinItemType.Series,
+                    )
+                )
+            )
         },
     )
 }

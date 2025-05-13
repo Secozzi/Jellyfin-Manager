@@ -24,7 +24,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.UUID
 import org.jellyfin.sdk.model.serializer.UUIDSerializer
@@ -34,7 +33,7 @@ import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreenContent
 import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreenContent
 import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
 import xyz.secozzi.jellyfinmanager.presentation.utils.serializableType
-import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinItemType
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinScreenViewModel.JellyfinItemType
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 import kotlin.reflect.typeOf
 
@@ -62,15 +61,15 @@ fun JellyfinEntryScreen(type: JellyfinItemType) {
     val navigator = LocalNavController.current
     val viewModel = koinViewModel<JellyfinEntryScreenViewModel>()
 
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val item by viewModel.item.collectAsState()
     val saveState by viewModel.saveState.collectAsState()
-    val item by viewModel.details.collectAsState()
+    val details by viewModel.details.collectAsState()
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = "Edit ${type.name.lowercase()}")
+                    Text(text = "Manage ${type.name.lowercase()}")
                 },
                 navigationIcon = {
                     IconButton(onClick = { navigator.popBackStack() }) {
@@ -82,7 +81,7 @@ fun JellyfinEntryScreen(type: JellyfinItemType) {
         bottomBar = {
             Button(
                 onClick = viewModel::save,
-                enabled = state.isSuccess(),
+                enabled = item.isSuccess(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(WindowInsets.navigationBars.asPaddingValues())
@@ -90,7 +89,7 @@ fun JellyfinEntryScreen(type: JellyfinItemType) {
             ) {
                 when (saveState) {
                     JellyfinEntryScreenViewModel.SaveState.Idle -> {
-                        Text("Save to ${type.name.lowercase()}.nfo")
+                        Text("Update ${type.name.lowercase()}")
                     }
                     JellyfinEntryScreenViewModel.SaveState.Loading -> {
                         CircularProgressIndicator(
@@ -109,25 +108,26 @@ fun JellyfinEntryScreen(type: JellyfinItemType) {
             }
         }
     ) { contentPadding ->
-        if (state.isLoading() || state.isIdle()) {
+        if (item.isLoading() || item.isIdle()) {
             LoadingScreenContent()
             return@Scaffold
         }
 
-        if (state.isError()) {
+        if (item.isError()) {
             ErrorScreenContent(
-                error = state.getError(),
+                error = item.getError(),
                 modifier = Modifier.fillMaxSize(),
             )
             return@Scaffold
         }
 
         JellyfinEntryScreenContent(
-            item = item,
+            details = details,
             onTitleChange = viewModel::onTitleChange,
             onStudioChange = viewModel::onStudioChange,
             onDescriptionChange = viewModel::onDescriptionChange,
             onGenreChange = viewModel::onGenreChange,
+            onSeasonNumberChange = viewModel::onSeasonNumberChange,
             modifier = Modifier.padding(contentPadding),
         )
     }

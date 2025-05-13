@@ -23,7 +23,7 @@ fun BaseItemDto.toJellyfinImage(baseUrl: String): JellyfinImage {
 
     val showPrimary = seriesPrimaryImageTag?.let { tag ->
         baseUri.buildUpon().apply {
-            appendEncodedPath("items/$id/Images/${ImageType.PRIMARY}")
+            appendEncodedPath("items/$seriesId/Images/${ImageType.PRIMARY}")
             appendQueryParameter("tag", tag)
         }.build()
     }

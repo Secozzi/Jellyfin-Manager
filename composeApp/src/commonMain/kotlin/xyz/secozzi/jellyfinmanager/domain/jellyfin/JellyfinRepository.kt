@@ -1,6 +1,8 @@
 package xyz.secozzi.jellyfinmanager.domain.jellyfin
 
 import org.jellyfin.sdk.model.UUID
+import org.jellyfin.sdk.model.api.BaseItemDto
+import org.jellyfin.sdk.model.api.BaseItemKind
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinCollection
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinItem
@@ -13,5 +15,7 @@ interface JellyfinRepository {
 
     suspend fun getItems(parentId: UUID?): List<JellyfinItem>
 
-    suspend fun getItem(id: UUID): JellyfinItem?
+    suspend fun getItem(id: UUID): BaseItemDto
+
+    suspend fun updateItem(id: UUID, type: BaseItemKind, item: BaseItemDto)
 }

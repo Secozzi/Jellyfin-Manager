@@ -9,22 +9,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinItem
+import xyz.secozzi.jellyfinmanager.presentation.jellyfin.browse.components.EditJellyfinItem
 import xyz.secozzi.jellyfinmanager.presentation.jellyfin.browse.components.JellyfinEntryItem
 import xyz.secozzi.jellyfinmanager.presentation.utils.isLandscapeMode
-import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinItems
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinScreenViewModel
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinScreenViewModel.JellyfinItemList
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 
 @Composable
 fun JellyfinBrowseScreen(
-    jellyfinItems: JellyfinItems,
+    jellyfinItems: JellyfinItemList,
     onClickItem: (JellyfinItem) -> Unit,
+    onClickEditSeries: () -> Unit,
 ) {
-    val aspectRatio = if (jellyfinItems is JellyfinItems.Libraries) 16f / 9f else 2f / 3f
+    val aspectRatio = if (jellyfinItems is JellyfinItemList.Libraries) 16f / 9f else 2f / 3f
 
     val columns = if (isLandscapeMode()) {
-        if (jellyfinItems is JellyfinItems.Libraries) GridCells.FixedSize(300.dp) else GridCells.FixedSize(100.dp)
+        if (jellyfinItems is JellyfinItemList.Libraries) GridCells.FixedSize(300.dp) else GridCells.FixedSize(100.dp)
     } else {
-        if (jellyfinItems is JellyfinItems.Libraries) GridCells.Fixed(2) else GridCells.Fixed(3)
+        if (jellyfinItems is JellyfinItemList.Libraries) GridCells.Fixed(2) else GridCells.Fixed(3)
     }
 
     LazyVerticalGrid(
@@ -36,6 +39,15 @@ fun JellyfinBrowseScreen(
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.small),
     ) {
+        if (jellyfinItems is JellyfinItemList.Seasons) {
+            item {
+                EditJellyfinItem(
+                    imageAspectRatio = aspectRatio,
+                    onClick = onClickEditSeries,
+                )
+            }
+        }
+
         items(
             items = jellyfinItems.items,
             key = { it.id },

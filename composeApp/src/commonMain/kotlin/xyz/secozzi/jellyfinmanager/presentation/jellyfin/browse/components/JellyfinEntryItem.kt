@@ -1,5 +1,6 @@
 package xyz.secozzi.jellyfinmanager.presentation.jellyfin.browse.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -7,6 +8,9 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -61,6 +65,51 @@ fun JellyfinEntryItem(
 
             Text(
                 text = item.name,
+                fontSize = 12.sp,
+                lineHeight = 18.sp,
+                minLines = 1,
+                maxLines = 3,
+                style = MaterialTheme.typography.titleSmall,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(MaterialTheme.spacing.extraSmall),
+            )
+        }
+    }
+}
+
+@Composable
+fun EditJellyfinItem(
+    imageAspectRatio: Float,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.extraSmall)
+            .padding(4.dp)
+            .combinedClickable(
+                onClick = onClick,
+            ),
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Box(
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.surfaceContainer)
+                    .fillMaxSize()
+                    .aspectRatio(imageAspectRatio)
+                    .clip(MaterialTheme.shapes.extraSmall),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(Icons.Outlined.Edit, null)
+            }
+
+            Text(
+                text = "Edit series",
                 fontSize = 12.sp,
                 lineHeight = 18.sp,
                 minLines = 1,
