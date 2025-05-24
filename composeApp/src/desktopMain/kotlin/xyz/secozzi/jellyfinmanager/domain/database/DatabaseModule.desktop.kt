@@ -28,7 +28,7 @@ actual val JMDatabaseModule = module {
                 },
             ).also { driver ->
                 JMDatabase.Schema.create(driver = driver)
-            }
+            },
         )
     }
 }

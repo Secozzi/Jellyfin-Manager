@@ -27,7 +27,7 @@ sealed class DataStorePreference<T>(
     private val dataStore: DataStore<Preferences>,
     key: String,
     private val defaultValue: T,
-): Preference<T> {
+) : Preference<T> {
     abstract fun read(key: Preferences.Key<T>): T
 
     abstract fun write(key: Preferences.Key<T>, value: T)
@@ -61,7 +61,7 @@ sealed class DataStorePreference<T>(
     }
 
     override fun changes(): Flow<T> {
-        return dataStore.data.map { it[key]?: defaultValue }
+        return dataStore.data.map { it[key] ?: defaultValue }
     }
 
     override fun stateIn(scope: CoroutineScope): StateFlow<T> {
@@ -73,7 +73,7 @@ class StringPrimitive(
     private val dataStore: DataStore<Preferences>,
     key: String,
     private val defaultValue: String,
-): DataStorePreference<String>(dataStore, key, defaultValue) {
+) : DataStorePreference<String>(dataStore, key, defaultValue) {
     override val key = stringPreferencesKey(key)
 
     override fun read(key: Preferences.Key<String>): String {
@@ -90,12 +90,12 @@ class StringPrimitive(
 class IntPrimitive(
     private val dataStore: DataStore<Preferences>,
     key: String,
-    private val defaultValue: Int
-): DataStorePreference<Int>(dataStore, key, defaultValue) {
+    private val defaultValue: Int,
+) : DataStorePreference<Int>(dataStore, key, defaultValue) {
     override val key: Preferences.Key<Int> = intPreferencesKey(key)
 
     override fun read(key: Preferences.Key<Int>): Int {
-        return runBlocking { dataStore.data.map { it[key] }.firstOrNull()?: defaultValue }
+        return runBlocking { dataStore.data.map { it[key] }.firstOrNull() ?: defaultValue }
     }
 
     override fun write(key: Preferences.Key<Int>, value: Int) {
@@ -107,11 +107,11 @@ class FloatPrimitive(
     private val dataStore: DataStore<Preferences>,
     key: String,
     private val defaultValue: Float,
-): DataStorePreference<Float>(dataStore, key, defaultValue) {
+) : DataStorePreference<Float>(dataStore, key, defaultValue) {
     override val key = floatPreferencesKey(key)
 
     override fun read(key: Preferences.Key<Float>): Float {
-        return runBlocking { dataStore.data.map { it[key] }.firstOrNull()?: defaultValue }
+        return runBlocking { dataStore.data.map { it[key] }.firstOrNull() ?: defaultValue }
     }
 
     override fun write(key: Preferences.Key<Float>, value: Float) {
@@ -123,11 +123,11 @@ class DoublePrimitive(
     private val dataStore: DataStore<Preferences>,
     key: String,
     private val defaultValue: Double,
-): DataStorePreference<Double>(dataStore, key, defaultValue) {
+) : DataStorePreference<Double>(dataStore, key, defaultValue) {
     override val key = doublePreferencesKey(key)
 
     override fun read(key: Preferences.Key<Double>): Double {
-        return runBlocking { dataStore.data.map { it[key] }.firstOrNull()?: defaultValue }
+        return runBlocking { dataStore.data.map { it[key] }.firstOrNull() ?: defaultValue }
     }
 
     override fun write(key: Preferences.Key<Double>, value: Double) {
@@ -139,11 +139,11 @@ class LongPrimitive(
     private val dataStore: DataStore<Preferences>,
     key: String,
     private val defaultValue: Long,
-): DataStorePreference<Long>(dataStore, key, defaultValue) {
+) : DataStorePreference<Long>(dataStore, key, defaultValue) {
     override val key = longPreferencesKey(key)
 
     override fun read(key: Preferences.Key<Long>): Long {
-        return runBlocking { dataStore.data.map { it[key] }.firstOrNull()?: defaultValue }
+        return runBlocking { dataStore.data.map { it[key] }.firstOrNull() ?: defaultValue }
     }
 
     override fun write(key: Preferences.Key<Long>, value: Long) {
@@ -155,11 +155,11 @@ class BooleanPrimitive(
     private val dataStore: DataStore<Preferences>,
     key: String,
     private val defaultValue: Boolean,
-): DataStorePreference<Boolean>(dataStore, key, defaultValue) {
+) : DataStorePreference<Boolean>(dataStore, key, defaultValue) {
     override val key = booleanPreferencesKey(key)
 
     override fun read(key: Preferences.Key<Boolean>): Boolean {
-        return runBlocking { dataStore.data.map { it[key] }.firstOrNull()?: defaultValue }
+        return runBlocking { dataStore.data.map { it[key] }.firstOrNull() ?: defaultValue }
     }
 
     override fun write(key: Preferences.Key<Boolean>, value: Boolean) {
@@ -171,11 +171,11 @@ class StringSetPrimitive(
     private val dataStore: DataStore<Preferences>,
     key: String,
     private val defaultValue: Set<String>,
-): DataStorePreference<Set<String>>(dataStore, key, defaultValue) {
+) : DataStorePreference<Set<String>>(dataStore, key, defaultValue) {
     override val key = stringSetPreferencesKey(key)
 
     override fun read(key: Preferences.Key<Set<String>>): Set<String> {
-        return runBlocking { dataStore.data.map { it[key] }.firstOrNull()?: defaultValue }
+        return runBlocking { dataStore.data.map { it[key] }.firstOrNull() ?: defaultValue }
     }
 
     override fun write(key: Preferences.Key<Set<String>>, value: Set<String>) {
@@ -187,11 +187,11 @@ class ByteArrayPrimitive(
     private val dataStore: DataStore<Preferences>,
     key: String,
     private val defaultValue: ByteArray,
-): DataStorePreference<ByteArray>(dataStore, key, defaultValue) {
+) : DataStorePreference<ByteArray>(dataStore, key, defaultValue) {
     override val key = byteArrayPreferencesKey(key)
 
     override fun read(key: Preferences.Key<ByteArray>): ByteArray {
-        return runBlocking { dataStore.data.map { it[key] }.firstOrNull()?: defaultValue }
+        return runBlocking { dataStore.data.map { it[key] }.firstOrNull() ?: defaultValue }
     }
 
     override fun write(key: Preferences.Key<ByteArray>, value: ByteArray) {
@@ -205,7 +205,7 @@ class Object<T>(
     key: String,
     private val defaultValue: T,
     private val serializer: (T) -> String,
-    private val deserializer: (String) -> T
+    private val deserializer: (String) -> T,
 ) : DataStorePreference<T>(dataStore, key, defaultValue) {
     override val key = stringPreferencesKey(key) as Preferences.Key<T>
     override fun read(key: Preferences.Key<T>): T {

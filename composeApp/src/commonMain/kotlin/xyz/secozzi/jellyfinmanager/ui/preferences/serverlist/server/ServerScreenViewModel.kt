@@ -132,7 +132,7 @@ class ServerScreenViewModel(
                         jfAddress = server.jfAddress,
                         jfUsername = server.jfUsername,
                         jfPassword = server.jfPassword,
-                    )
+                    ),
                 )
 
                 _state.update { _ -> State.Success(State.SaveState.Success) }

@@ -42,16 +42,16 @@ fun JellyfinScreen() {
                         data = JellyfinEntryRouteData(
                             itemId = it.id,
                             itemType = JellyfinScreenViewModel.JellyfinItemType.Movie,
-                        )
-                    )
+                        ),
+                    ),
                 )
                 BaseItemKind.SEASON -> navigator.navigate(
                     route = JellyfinEntryRoute(
                         data = JellyfinEntryRouteData(
                             itemId = it.id,
                             itemType = JellyfinScreenViewModel.JellyfinItemType.Season,
-                        )
-                    )
+                        ),
+                    ),
                 )
                 else -> viewModel.onClickItem(it)
             }
@@ -59,15 +59,15 @@ fun JellyfinScreen() {
         onClickEditSeries = {
             val id = (
                 (state as RequestState.Success).data as JellyfinScreenViewModel.JellyfinItemList.Seasons
-            ).seriesId
+                ).seriesId
 
             navigator.navigate(
                 route = JellyfinEntryRoute(
                     data = JellyfinEntryRouteData(
                         itemId = id,
                         itemType = JellyfinScreenViewModel.JellyfinItemType.Series,
-                    )
-                )
+                    ),
+                ),
             )
         },
     )

@@ -120,7 +120,7 @@ fun JellyfinEntryScreen(
                             Icon(Icons.Default.Refresh, null)
                         }
                     }
-                }
+                },
             )
         },
         bottomBar = {
@@ -167,7 +167,7 @@ fun JellyfinEntryScreen(
                         FabButtonItem(
                             iconRes = Icons.Default.Delete,
                             label = "Delete current",
-                            key = "delete"
+                            key = "delete",
                         ),
                     ),
                     fabState = fabState,
@@ -181,7 +181,7 @@ fun JellyfinEntryScreen(
                     ),
                 )
             }
-        }
+        },
     ) { contentPadding ->
         if (state.isWaiting()) {
             LoadingScreenContent()

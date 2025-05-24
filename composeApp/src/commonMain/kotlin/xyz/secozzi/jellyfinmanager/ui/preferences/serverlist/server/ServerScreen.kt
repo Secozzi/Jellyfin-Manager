@@ -51,7 +51,7 @@ fun ServerScreen(serverId: Long? = null) {
                     IconButton(onClick = { navigator.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, null)
                     }
-                }
+                },
             )
         },
         bottomBar = {
@@ -66,12 +66,20 @@ fun ServerScreen(serverId: Long? = null) {
                 ) {
                     when ((state as ServerScreenViewModel.State.Success).saveState) {
                         ServerScreenViewModel.State.SaveState.Error -> Icon(Icons.Default.Error, null)
-                        ServerScreenViewModel.State.SaveState.Idle -> Text(if (serverId == null) "Add server" else "Edit server")
+                        ServerScreenViewModel.State.SaveState.Idle -> Text(
+                            if (serverId ==
+                                null
+                            ) {
+                                "Add server"
+                            } else {
+                                "Edit server"
+                            },
+                        )
                         ServerScreenViewModel.State.SaveState.Success -> Icon(Icons.Default.Check, null)
                     }
                 }
             }
-        }
+        },
     ) { contentPadding ->
         ServerScreenContent(
             state = state,

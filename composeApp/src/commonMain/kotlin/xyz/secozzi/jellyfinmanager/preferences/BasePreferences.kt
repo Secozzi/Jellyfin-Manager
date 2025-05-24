@@ -5,7 +5,7 @@ import xyz.secozzi.jellyfinmanager.preferences.preference.getEnum
 import xyz.secozzi.jellyfinmanager.presentation.theme.DarkMode
 
 class BasePreferences(
-    preferences: PreferenceStore
+    preferences: PreferenceStore,
 ) {
     val sqlPassword = preferences.getString("sql_password")
     val darkMode = preferences.getEnum("dark_mode", DarkMode.Dark)

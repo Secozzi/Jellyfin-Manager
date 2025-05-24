@@ -32,7 +32,7 @@ actual val JMDatabaseModule = module {
                         cursor.close()
                     }
                 },
-            )
+            ),
         )
     }
 }

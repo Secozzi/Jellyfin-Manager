@@ -47,7 +47,6 @@ class JellyfinScreenViewModel(
 
     init {
 
-
         viewModelScope.launch {
             serverStateHolder.selectedServer.filterNotNull().collectLatest { selected ->
                 hasInitializedServer.update { _ -> false }

@@ -76,7 +76,7 @@ fun JellyfinEntryScreenContent(
         )
 
         AnimatedVisibility(
-            visible = details.seasonNumber != null
+            visible = details.seasonNumber != null,
         ) {
             OutlinedTextField(
                 value = details.seasonNumber ?: "0",

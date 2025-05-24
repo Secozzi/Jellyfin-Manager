@@ -11,6 +11,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.buildkonfig)
     alias(libs.plugins.sqldelight)
+    alias(libs.plugins.spotless)
 }
 
 private val versionStr = "0.1.0"
@@ -21,12 +22,12 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_21)
         }
     }
-    
+
     jvm("desktop")
-    
+
     sourceSets {
         val desktopMain by getting
-        
+
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
@@ -126,6 +127,20 @@ sqldelight {
             verifyMigrations = true
             verifyDefinitions = true
         }
+    }
+}
+
+spotless {
+    kotlin {
+        target("**/*.kt")
+        ktlint(libs.versions.ktlint.core.get())
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    format("xml") {
+        target("**/*.xml")
+        trimTrailingWhitespace()
+        endWithNewline()
     }
 }
 

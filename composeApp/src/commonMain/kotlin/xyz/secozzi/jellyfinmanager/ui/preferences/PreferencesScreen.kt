@@ -36,27 +36,27 @@ fun PreferencesScreen() {
                     IconButton(onClick = { navigator.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, null)
                     }
-                }
+                },
             )
-        }
+        },
     ) { contentPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(contentPadding)
+                .padding(contentPadding),
         ) {
             SettingsMenuLink(
                 title = { Text(text = "Appearance") },
                 subtitle = { Text(text = "Dark mode, Material You") },
                 icon = { Icon(Icons.Outlined.Palette, null) },
-                onClick = { navigator.navigate(AppearancePreferencesRoute) }
+                onClick = { navigator.navigate(AppearancePreferencesRoute) },
             )
 
             SettingsMenuLink(
                 title = { Text(text = "Servers") },
                 subtitle = { Text(text = "Configure server list") },
                 icon = { Icon(Icons.Outlined.Dns, null) },
-                onClick = { navigator.navigate(ServerListRoute) }
+                onClick = { navigator.navigate(ServerListRoute) },
             )
         }
     }

@@ -75,7 +75,7 @@ fun ServerListScreenContent(
             top = MaterialTheme.spacing.small,
             start = MaterialTheme.spacing.medium,
             end = MaterialTheme.spacing.medium,
-        )
+        ),
     )
 }
 

@@ -1,6 +1,5 @@
 package xyz.secozzi.jellyfinmanager.presentation.components
 
-
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
@@ -91,7 +90,7 @@ interface FabButtonMain {
  */
 private class FabButtonMainImpl(
     override val iconRes: ImageVector,
-    override val iconRotate: Float?
+    override val iconRotate: Float?,
 ) : FabButtonMain
 
 /**
@@ -103,7 +102,6 @@ private class FabButtonMainImpl(
  */
 fun FabButtonMain(iconRes: ImageVector = Icons.Filled.Add, iconRotate: Float = 45f): FabButtonMain =
     FabButtonMainImpl(iconRes, iconRotate)
-
 
 /**
  * Represents a sub-item for a Floating Action Button (FAB) with customized icon and background tints.
@@ -122,7 +120,7 @@ interface FabButtonSub {
  */
 private class FabButtonSubImpl(
     override val iconTint: Color,
-    override val backgroundTint: Color
+    override val backgroundTint: Color,
 ) : FabButtonSub
 
 /**
@@ -157,7 +155,7 @@ fun MultiFloatingActionButton(
     fabIcon: FabButtonMain,
     fabOption: FabButtonSub = FabButtonSub(),
     onFabItemClicked: (fabItem: FabButtonItem) -> Unit,
-    stateChanged: (fabState: FabButtonState) -> Unit = {}
+    stateChanged: (fabState: FabButtonState) -> Unit = {},
 ) {
     // Animation for rotating the main FAB icon based on its state (expanded or collapsed)
     val rotation by animateFloatAsState(
@@ -166,31 +164,31 @@ fun MultiFloatingActionButton(
         } else {
             0f
         },
-        label = "Main fab rotation"
+        label = "Main fab rotation",
     )
 
     Column(
         modifier = modifier.wrapContentSize(),
-        horizontalAlignment = Alignment.End
+        horizontalAlignment = Alignment.End,
     ) {
         // AnimatedVisibility to show or hide the sub-items when the Multi-FAB is expanded or collapsed
         AnimatedVisibility(
             visible = fabState.value.isExpanded(),
             enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically()
+            exit = fadeOut() + shrinkVertically(),
         ) {
             // LazyColumn to display the sub-items in a vertical list
             LazyColumn(
                 modifier = Modifier.wrapContentSize(),
                 horizontalAlignment = Alignment.End,
-                verticalArrangement = Arrangement.spacedBy(15.dp)
+                verticalArrangement = Arrangement.spacedBy(15.dp),
             ) {
                 items(items.size) { index ->
                     // Composable to display each individual sub-item
                     MiniFabItem(
                         item = items[index],
                         fabOption = fabOption,
-                        onFabItemClicked = onFabItemClicked
+                        onFabItemClicked = onFabItemClicked,
                     )
                 }
                 item {} // Empty item to provide spacing at the end of the list
@@ -204,14 +202,14 @@ fun MultiFloatingActionButton(
                 stateChanged(fabState.value)
             },
             containerColor = fabOption.backgroundTint,
-            contentColor = fabOption.iconTint
+            contentColor = fabOption.iconTint,
         ) {
             // Icon for the main FAB with optional rotation based on its state (expanded or collapsed)
             Icon(
                 imageVector = fabIcon.iconRes,
                 contentDescription = "Main fab button",
                 modifier = Modifier.rotate(rotation),
-                tint = fabOption.iconTint
+                tint = fabOption.iconTint,
             )
         }
     }
@@ -228,14 +226,14 @@ fun MultiFloatingActionButton(
 fun MiniFabItem(
     item: FabButtonItem,
     fabOption: FabButtonSub,
-    onFabItemClicked: (item: FabButtonItem) -> Unit
+    onFabItemClicked: (item: FabButtonItem) -> Unit,
 ) {
     Row(
         modifier = Modifier
             .wrapContentSize()
             .padding(end = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         // Text label for the sub-item displayed in a rounded-corner background
         Text(
@@ -245,7 +243,7 @@ fun MiniFabItem(
             modifier = Modifier
                 .clip(RoundedCornerShape(size = 8.dp))
                 .background(MaterialTheme.colorScheme.secondary)
-                .padding(all = 8.dp)
+                .padding(all = 8.dp),
         )
 
         // FloatingActionButton representing the sub-item
@@ -253,13 +251,13 @@ fun MiniFabItem(
             onClick = { onFabItemClicked(item) },
             modifier = Modifier.size(40.dp),
             containerColor = fabOption.backgroundTint,
-            contentColor = fabOption.iconTint
+            contentColor = fabOption.iconTint,
         ) {
             // Icon for the sub-item with customized tint
             Icon(
                 imageVector = item.iconRes,
                 contentDescription = "Float icon",
-                tint = fabOption.iconTint
+                tint = fabOption.iconTint,
             )
         }
     }
@@ -280,7 +278,7 @@ fun MenuItemPreview() {
             FabButtonItem(
                 iconRes = Icons.Default.Delete,
                 label = "Delete current",
-                key = "delete"
+                key = "delete",
             ),
         ),
         fabState = fabState,

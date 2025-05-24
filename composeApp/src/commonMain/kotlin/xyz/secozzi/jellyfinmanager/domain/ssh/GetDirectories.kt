@@ -55,7 +55,7 @@ class GetDirectories(
             )
         }.toList()
 
-        val filtered =  if (server.sshBaseDirBlacklist.isBlank()) {
+        val filtered = if (server.sshBaseDirBlacklist.isBlank()) {
             directories
         } else {
             val blacklist = server.sshBaseDirBlacklist.split(',')
@@ -64,7 +64,9 @@ class GetDirectories(
         return Result.success(filtered)
     }
 
-    private val lsRegex = Regex("""([d\-])[\w-]{9}\s+(\d+)\s+\S+\s+\S+\s+(\S+)\s+(\S+)\s+(\S+)\s+\S+\s+(.+)${'$'}""", RegexOption.MULTILINE)
+    private val lsRegex =
+        Regex(
+            """([d\-])[\w-]{9}\s+(\d+)\s+\S+\s+\S+\s+(\S+)\s+(\S+)\s+(\S+)\s+\S+\s+(.+)${'$'}""",
+            RegexOption.MULTILINE,
+        )
 }
-
-

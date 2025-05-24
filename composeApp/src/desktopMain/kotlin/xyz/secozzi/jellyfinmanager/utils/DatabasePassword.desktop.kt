@@ -14,7 +14,7 @@ import kotlin.random.Random
 @OptIn(ExperimentalEncodingApi::class)
 actual object DatabasePassword {
     private val generalPreferences by inject<BasePreferences>(BasePreferences::class.java)
-    
+
     actual fun getDatabasePassword(): ByteArray {
         var encryptedPassword = generalPreferences.sqlPassword.get()
         if (encryptedPassword.isBlank()) {

@@ -35,23 +35,23 @@ fun AppearancePreferencesScreen() {
     val preferences = koinInject<BasePreferences>()
 
     Scaffold(
-    topBar = {
-        TopAppBar(
-            title = {
-                Text("Appearance")
-            },
-            navigationIcon = {
-                IconButton(onClick = { navigator.popBackStack() }) {
-                    Icon(Icons.AutoMirrored.Default.ArrowBack, null)
-                }
-            }
-        )
-    }
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text("Appearance")
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navigator.popBackStack() }) {
+                        Icon(Icons.AutoMirrored.Default.ArrowBack, null)
+                    }
+                },
+            )
+        },
     ) { contentPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(contentPadding)
+                .padding(contentPadding),
         ) {
             val darkMode by preferences.darkMode.collectAsState()
             MultiChoiceSegmentedButtonsPreference(

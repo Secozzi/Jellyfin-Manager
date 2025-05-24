@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.WhileSubscribed
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onStart
@@ -25,7 +24,6 @@ import kotlinx.coroutines.flow.stateIn
 import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState.Error
 import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState.Loading
 import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState.Success
-import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 // https://gist.github.com/stevdza-san/cca20eff9f2c4c7d783ffd0a0061b352

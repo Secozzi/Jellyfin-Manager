@@ -20,11 +20,10 @@ import coil3.ImageLoader
 import coil3.compose.setSingletonImageLoaderFactory
 import coil3.request.crossfade
 import com.dokar.sonner.rememberToasterState
-import xyz.secozzi.jellyfinmanager.ui.home.HomeScreen
 import xyz.secozzi.jellyfinmanager.presentation.theme.AppTheme
 import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
-import xyz.secozzi.jellyfinmanager.ui.providers.LocalToaster
 import xyz.secozzi.jellyfinmanager.ui.home.HomeRoute
+import xyz.secozzi.jellyfinmanager.ui.home.HomeScreen
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryRoute
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryScreen
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.JellyfinSearchScreen
@@ -37,6 +36,7 @@ import xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.ServerListRoute
 import xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.ServerListScreen
 import xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.server.ServerRoute
 import xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.server.ServerScreen
+import xyz.secozzi.jellyfinmanager.ui.providers.LocalToaster
 
 @Composable
 fun App() {

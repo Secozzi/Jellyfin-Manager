@@ -56,7 +56,6 @@ class JellyfinEntryScreenViewModel(
     }
 
     fun onSearch(id: String) {
-
     }
 
     fun save() {
@@ -103,7 +102,7 @@ class JellyfinEntryScreenViewModel(
     fun onTitleChange(value: String) {
         _details.update { details ->
             details.copy(
-                title = value
+                title = value,
             )
         }
     }
@@ -111,7 +110,7 @@ class JellyfinEntryScreenViewModel(
     fun onStudioChange(value: String) {
         _details.update { details ->
             details.copy(
-                studio = value
+                studio = value,
             )
         }
     }
@@ -119,7 +118,7 @@ class JellyfinEntryScreenViewModel(
     fun onDescriptionChange(value: String) {
         _details.update { details ->
             details.copy(
-                description = value
+                description = value,
             )
         }
     }
@@ -127,7 +126,7 @@ class JellyfinEntryScreenViewModel(
     fun onGenreChange(value: String) {
         _details.update { details ->
             details.copy(
-                genre = value
+                genre = value,
             )
         }
     }
@@ -136,7 +135,7 @@ class JellyfinEntryScreenViewModel(
         if (value.isEmpty() || value.toIntOrNull() != null) {
             _details.update { details ->
                 details.copy(
-                    seasonNumber = value
+                    seasonNumber = value,
                 )
             }
         }
@@ -171,7 +170,7 @@ class JellyfinEntryScreenViewModel(
                 description = this.overview ?: "",
                 genre = this.genres.orEmpty().joinToString(),
                 path = this.path ?: "",
-                seasonNumber = (this.indexNumber ?: 0).takeIf{ this.type == BaseItemKind.SEASON }?.toString()
+                seasonNumber = (this.indexNumber ?: 0).takeIf { this.type == BaseItemKind.SEASON }?.toString(),
             )
 
             val EMPTY = JellyfinEntryDetails(

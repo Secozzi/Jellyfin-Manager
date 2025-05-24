@@ -66,7 +66,7 @@ fun SSHScreen() {
                     viewModel.dismissDialog()
                     viewModel.createDirectory(newPath)
                 },
-                onCancel = { viewModel.dismissDialog() }
+                onCancel = { viewModel.dismissDialog() },
             )
         }
         is SSHDialogs.DeleteDirectory -> {

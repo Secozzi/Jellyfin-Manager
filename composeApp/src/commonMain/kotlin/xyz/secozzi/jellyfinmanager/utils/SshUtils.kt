@@ -17,7 +17,7 @@ fun SFTPClient.writeToFile(path: String, content: String) {
 suspend fun <R> useSFTPClient(
     client: SSHClient?,
     block: suspend (SFTPClient) -> R,
-) : R {
+): R {
     return withContext(Dispatchers.IO) {
         client?.newSFTPClient()?.use { sftp ->
             block(sftp)

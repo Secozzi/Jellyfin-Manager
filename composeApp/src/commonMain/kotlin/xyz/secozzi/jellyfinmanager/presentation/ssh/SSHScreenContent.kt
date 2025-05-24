@@ -1,6 +1,5 @@
 package xyz.secozzi.jellyfinmanager.presentation.ssh
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,7 +31,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import dev.materii.pullrefresh.PullRefreshLayout
@@ -80,7 +78,7 @@ fun SSHScreenContent(
                 if (platform == Platform.Desktop) {
                     IconButton(
                         onClick = onRefresh,
-                        modifier = Modifier.padding(end = MaterialTheme.spacing.medium)
+                        modifier = Modifier.padding(end = MaterialTheme.spacing.medium),
                     ) {
                         Icon(Icons.Default.Refresh, null)
                     }
@@ -143,7 +141,7 @@ fun SSHScreenContent(
                                 IconButton(onClick = { onDelete(directory) }) {
                                     Icon(Icons.Outlined.Delete, null)
                                 }
-                            }
+                            },
                         )
                     }
                 }

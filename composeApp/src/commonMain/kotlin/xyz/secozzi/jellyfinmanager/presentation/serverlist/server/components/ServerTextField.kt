@@ -36,7 +36,11 @@ fun ServerTextField(
         isError = if (required) !validate(value) else false,
         supportingText = {
             if (required) {
-                if (!validate(value)) { Text(errorMessage) } else null
+                if (!validate(value)) {
+                    Text(errorMessage)
+                } else {
+                    null
+                }
             } else {
                 Text("(optional)")
             }
@@ -44,7 +48,13 @@ fun ServerTextField(
         keyboardOptions = keyboardOptions,
         singleLine = true,
         modifier = Modifier.fillMaxWidth(),
-        visualTransformation = if (!isPassword || showPassword.value) VisualTransformation.None else PasswordVisualTransformation(),
+        visualTransformation = if (!isPassword ||
+            showPassword.value
+        ) {
+            VisualTransformation.None
+        } else {
+            PasswordVisualTransformation()
+        },
         trailingIcon = {
             if (isPassword) {
                 val icon = if (showPassword.value) {
@@ -57,6 +67,6 @@ fun ServerTextField(
                     Icon(icon, contentDescription = "Visibility")
                 }
             }
-        }
+        },
     )
 }

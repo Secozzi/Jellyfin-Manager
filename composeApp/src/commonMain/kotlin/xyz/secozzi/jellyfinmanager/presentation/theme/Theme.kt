@@ -121,5 +121,5 @@ expect val MaterialYouColorScheme: @Composable (Boolean) -> ColorScheme
 enum class DarkMode {
     Light,
     Dark,
-    System
+    System,
 }

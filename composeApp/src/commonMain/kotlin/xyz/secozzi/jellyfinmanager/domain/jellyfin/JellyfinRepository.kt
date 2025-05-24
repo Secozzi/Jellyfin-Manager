@@ -7,8 +7,6 @@ import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinCollection
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinItem
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinSearchResult
-import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinSeries
-import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinUser
 
 interface JellyfinRepository {
     suspend fun loadServer(server: Server)

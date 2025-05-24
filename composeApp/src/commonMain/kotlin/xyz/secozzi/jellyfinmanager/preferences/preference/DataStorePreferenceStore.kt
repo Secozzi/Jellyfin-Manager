@@ -4,8 +4,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 
 class DataStorePreferenceStore(
-    private val dataStore: DataStore<Preferences>
-): PreferenceStore {
+    private val dataStore: DataStore<Preferences>,
+) : PreferenceStore {
     override fun getString(key: String, defaultValue: String): Preference<String> {
         return StringPrimitive(dataStore, key, defaultValue)
     }
@@ -45,7 +45,7 @@ class DataStorePreferenceStore(
             key,
             defaultValue,
             serializer,
-            deserializer
+            deserializer,
         )
     }
 }

@@ -103,7 +103,7 @@ class ServerDao(
         jfAddress: String,
         jfUsername: String,
         jfPassword: String,
-    ) : Server {
+    ): Server {
         return Server(
             id = id,
             name = name,

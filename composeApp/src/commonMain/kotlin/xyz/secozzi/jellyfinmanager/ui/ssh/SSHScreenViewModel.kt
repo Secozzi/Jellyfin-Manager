@@ -92,7 +92,7 @@ class SSHScreenViewModel(
     fun onClickDirectory(directory: Directory) {
         _sshData.update { data ->
             data.copy(
-                pathList = data.pathList + directory.name
+                pathList = data.pathList + directory.name,
             )
         }
     }
@@ -104,7 +104,7 @@ class SSHScreenViewModel(
 
         _sshData.update { data ->
             data.copy(
-                pathList = data.pathList.subList(0, index + 1)
+                pathList = data.pathList.subList(0, index + 1),
             )
         }
     }
@@ -129,7 +129,7 @@ class SSHScreenViewModel(
             commands = listOf(
                 "rm",
                 "-rf",
-                newPath
+                newPath,
             ),
             errorMessage = "Error removing directory",
         )
@@ -150,7 +150,6 @@ class SSHScreenViewModel(
             } catch (_: Exception) {
                 _toasterEvent.emit(Toast(errorMessage))
             }
-
         }
     }
 

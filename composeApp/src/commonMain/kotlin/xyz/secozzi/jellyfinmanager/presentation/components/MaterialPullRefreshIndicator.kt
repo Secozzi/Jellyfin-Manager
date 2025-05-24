@@ -15,6 +15,6 @@ fun MaterialPullRefreshIndicator(
         state,
         backgroundColor = MaterialTheme.colorScheme.surfaceContainerHighest,
         contentColor = MaterialTheme.colorScheme.onSurface,
-        modifier = modifier
+        modifier = modifier,
     )
 }

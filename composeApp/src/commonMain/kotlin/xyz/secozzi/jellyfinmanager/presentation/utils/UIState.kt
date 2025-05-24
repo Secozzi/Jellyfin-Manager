@@ -61,7 +61,6 @@ fun <T, R> combineRefreshable(
         }
     }
 
-
 context(viewModel: StateViewModel)
 @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 fun <T, R> combineRefreshableResult(

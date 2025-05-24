@@ -9,7 +9,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -94,12 +93,16 @@ fun JellyfinSearchScreen(searchQuery: String) {
                     Text("Select")
                 }
             }
-        }
+        },
     ) { contentPadding ->
         when (state) {
             UIState.Idle -> {}
-            UIState.Loading -> { LoadingScreenContent() }
-            is UIState.Error -> { ErrorScreenContent(state.getError()) }
+            UIState.Loading -> {
+                LoadingScreenContent()
+            }
+            is UIState.Error -> {
+                ErrorScreenContent(state.getError())
+            }
             UIState.Success -> {
                 JellyfinSearchScreenContent(
                     selectedId = selectedId,

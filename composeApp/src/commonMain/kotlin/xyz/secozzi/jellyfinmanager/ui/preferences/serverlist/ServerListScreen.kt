@@ -54,7 +54,7 @@ fun ServerListScreen() {
                     IconButton(onClick = { navigator.popBackStack() }) {
                         Icon(Icons.AutoMirrored.Default.ArrowBack, null)
                     }
-                }
+                },
             )
         },
         floatingActionButton = {
@@ -63,7 +63,7 @@ fun ServerListScreen() {
                 icon = { Icon(Icons.Filled.Add, null) },
                 text = { Text("Add") },
             )
-        }
+        },
     ) { contentPadding ->
         ServerListScreenContent(
             state = state,

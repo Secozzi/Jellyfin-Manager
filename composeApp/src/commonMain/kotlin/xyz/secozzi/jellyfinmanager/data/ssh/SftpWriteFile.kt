@@ -20,7 +20,7 @@ class SftpWriteFile(
 
             sftpClient.writeToFile(filePath, fileContents)
         } finally {
-            client.disconnect();
+            client.disconnect()
         }
     }
 }

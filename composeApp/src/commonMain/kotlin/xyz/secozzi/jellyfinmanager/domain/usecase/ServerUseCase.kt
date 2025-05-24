@@ -18,7 +18,7 @@ class ServerUseCase(
             dao.insert(
                 server.copy(
                     index = index,
-                )
+                ),
             )
         } else {
             dao.update(server)

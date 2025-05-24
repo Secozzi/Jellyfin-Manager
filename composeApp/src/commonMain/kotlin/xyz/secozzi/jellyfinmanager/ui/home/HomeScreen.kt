@@ -47,10 +47,10 @@ import xyz.secozzi.jellyfinmanager.ui.home.components.DropDown
 import xyz.secozzi.jellyfinmanager.ui.home.components.NoServerContent
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinRoute
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinScreen
-import xyz.secozzi.jellyfinmanager.ui.ssh.SSHRoute
-import xyz.secozzi.jellyfinmanager.ui.ssh.SSHScreen
 import xyz.secozzi.jellyfinmanager.ui.preferences.PreferencesRoute
 import xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.server.ServerRoute
+import xyz.secozzi.jellyfinmanager.ui.ssh.SSHRoute
+import xyz.secozzi.jellyfinmanager.ui.ssh.SSHScreen
 
 @Serializable
 data object HomeRoute
@@ -87,7 +87,7 @@ fun HomeScreen() {
                     IconButton(onClick = { navigator.navigate(PreferencesRoute) }) {
                         Icon(Icons.Rounded.Settings, null)
                     }
-                }
+                },
             )
         },
         bottomBar = {
@@ -107,7 +107,8 @@ fun HomeScreen() {
                         NavigationBarItem(
                             icon = { Icon(bottomRoute.icon, contentDescription = bottomRoute.name) },
                             label = { Text(bottomRoute.name) },
-                            selected = currentDestination?.hierarchy?.any { it.hasRoute(bottomRoute.route::class) } == true,
+                            selected =
+                            currentDestination?.hierarchy?.any { it.hasRoute(bottomRoute.route::class) } == true,
                             onClick = {
                                 tabNavigator.navigate(bottomRoute.route) {
                                     popUpTo(tabNavigator.graph.findStartDestination().id) {
@@ -116,7 +117,7 @@ fun HomeScreen() {
                                     launchSingleTop = true
                                     restoreState = true
                                 }
-                            }
+                            },
                         )
                     }
                 }
@@ -127,11 +128,10 @@ fun HomeScreen() {
         HomeScreenContent(
             tabNavigator = tabNavigator,
             state = state,
-            modifier = Modifier.padding(contentPadding)
+            modifier = Modifier.padding(contentPadding),
         )
     }
 }
-
 
 @Composable
 private fun HomeScreenContent(
