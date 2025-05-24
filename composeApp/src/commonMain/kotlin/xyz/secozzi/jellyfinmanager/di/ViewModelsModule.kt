@@ -12,7 +12,6 @@ import xyz.secozzi.jellyfinmanager.ui.ssh.SSHScreenViewModel
 
 val ViewModelsModule = module {
     viewModelOf(::HomeScreenViewModel)
-    viewModelOf(::HomeScreenViewModel)
     viewModelOf(::ServerListScreenViewModel)
     viewModelOf(::SSHScreenViewModel)
     viewModelOf(::JellyfinScreenViewModel)

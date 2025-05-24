@@ -38,7 +38,7 @@ fun JellyfinScreenContent(
             return@Column
         }
 
-        val jellyfinItems = items.getOrThrow()
+        val jellyfinItems = items.getOrNull() ?: return@Column
         JellyfinBrowseScreen(
             jellyfinItems = jellyfinItems,
             onClickItem = onClickItem,

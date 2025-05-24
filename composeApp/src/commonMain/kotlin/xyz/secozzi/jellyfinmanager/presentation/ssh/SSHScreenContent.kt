@@ -99,7 +99,7 @@ fun SSHScreenContent(
                 return@Scaffold
             }
 
-            val directories = directories.getOrThrow()
+            val directories = directories.getOrNull() ?: return@Scaffold
             PullRefreshLayout(
                 state = ptrState,
                 indicator = { MaterialPullRefreshIndicator(ptrState) },
