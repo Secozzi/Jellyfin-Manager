@@ -16,7 +16,7 @@ import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.usecase.ServerUseCase
 
 class ServerScreenViewModel(
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
     private val serverUseCase: ServerUseCase,
 ) : ViewModel() {
     private val serverRoute = savedStateHandle.toRoute<ServerRoute>()

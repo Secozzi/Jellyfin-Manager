@@ -2,7 +2,6 @@ package xyz.secozzi.jellyfinmanager.ui.jellyfin.entry
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -41,8 +40,8 @@ import xyz.secozzi.jellyfinmanager.presentation.components.FabButtonState
 import xyz.secozzi.jellyfinmanager.presentation.components.MultiFloatingActionButton
 import xyz.secozzi.jellyfinmanager.presentation.components.rememberMultiFabState
 import xyz.secozzi.jellyfinmanager.presentation.jellyfin.entry.JellyfinEntryScreenContent
-import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreenContent
-import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreenContent
+import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreen
+import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreen
 import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
 import xyz.secozzi.jellyfinmanager.presentation.utils.serializableType
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinScreenViewModel.JellyfinItemType
@@ -92,8 +91,8 @@ fun JellyfinEntryScreen(
 
     LaunchedEffect(searchResult) {
         searchResult.value?.let {
-            backstack.savedStateHandle.set<String?>(SEARCH_RESULT_KEY, null)
             viewModel.onSearch(it)
+            backstack.savedStateHandle.set<String?>(SEARCH_RESULT_KEY, null)
         }
     }
 
@@ -184,14 +183,14 @@ fun JellyfinEntryScreen(
         },
     ) { contentPadding ->
         if (state.isWaiting()) {
-            LoadingScreenContent()
+            LoadingScreen(contentPadding)
             return@Scaffold
         }
 
         if (state.isError()) {
-            ErrorScreenContent(
+            ErrorScreen(
                 error = state.getError(),
-                modifier = Modifier.fillMaxSize(),
+                paddingValues = contentPadding,
             )
             return@Scaffold
         }
@@ -203,7 +202,7 @@ fun JellyfinEntryScreen(
             onDescriptionChange = viewModel::onDescriptionChange,
             onGenreChange = viewModel::onGenreChange,
             onSeasonNumberChange = viewModel::onSeasonNumberChange,
-            modifier = Modifier.padding(contentPadding),
+            paddingValues = contentPadding,
         )
     }
 }

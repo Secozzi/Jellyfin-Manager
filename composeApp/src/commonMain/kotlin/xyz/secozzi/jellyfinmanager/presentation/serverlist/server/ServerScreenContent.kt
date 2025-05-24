@@ -2,6 +2,7 @@ package xyz.secozzi.jellyfinmanager.presentation.serverlist.server
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -13,10 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
-import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreenContent
+import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreen
 import xyz.secozzi.jellyfinmanager.presentation.serverlist.server.components.ServerTextField
 import xyz.secozzi.jellyfinmanager.presentation.serverlist.server.components.SettingsSection
 import xyz.secozzi.jellyfinmanager.presentation.utils.isLandscapeMode
+import xyz.secozzi.jellyfinmanager.presentation.utils.plus
 import xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.server.ServerScreenViewModel
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 
@@ -36,10 +38,10 @@ fun ServerScreenContent(
     onSSHPrivateKeyChange: (String) -> Unit,
     onSSHBaseDirChange: (String) -> Unit,
     onSSHBaseDirBlacklistChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
+    paddingValues: PaddingValues,
 ) {
     if (state == ServerScreenViewModel.State.Loading) {
-        LoadingScreenContent(modifier)
+        LoadingScreen(paddingValues)
         return
     }
 
@@ -58,7 +60,7 @@ fun ServerScreenContent(
             onSSHPrivateKeyChange = onSSHPrivateKeyChange,
             onSSHBaseDirChange = onSSHBaseDirChange,
             onSSHBaseDirBlacklistChange = onSSHBaseDirBlacklistChange,
-            modifier = modifier,
+            paddingValues = paddingValues,
         )
     } else {
         ServerScreenSmallImpl(
@@ -75,7 +77,7 @@ fun ServerScreenContent(
             onSSHPrivateKeyChange = onSSHPrivateKeyChange,
             onSSHBaseDirChange = onSSHBaseDirChange,
             onSSHBaseDirBlacklistChange = onSSHBaseDirBlacklistChange,
-            modifier = modifier,
+            paddingValues = paddingValues,
         )
     }
 }
@@ -95,12 +97,12 @@ private fun ServerScreenSmallImpl(
     onSSHPrivateKeyChange: (String) -> Unit,
     onSSHBaseDirChange: (String) -> Unit,
     onSSHBaseDirBlacklistChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
+    paddingValues: PaddingValues,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
-        modifier = modifier
-            .padding(horizontal = MaterialTheme.spacing.medium)
+        modifier = Modifier
+            .padding(paddingValues + PaddingValues(horizontal = MaterialTheme.spacing.medium))
             .verticalScroll(rememberScrollState()),
     ) {
         ServerSection(
@@ -147,13 +149,13 @@ private fun ServerScreenLargeImpl(
     onSSHPrivateKeyChange: (String) -> Unit,
     onSSHBaseDirChange: (String) -> Unit,
     onSSHBaseDirBlacklistChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
+    paddingValues: PaddingValues,
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),
-        modifier = modifier
+        modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = MaterialTheme.spacing.medium),
+            .padding(paddingValues + PaddingValues(horizontal = MaterialTheme.spacing.medium)),
     ) {
         Column(
             modifier = Modifier.weight(1f),

@@ -1,5 +1,6 @@
 package xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.server
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,6 +25,7 @@ import kotlinx.serialization.Serializable
 import org.koin.compose.viewmodel.koinViewModel
 import xyz.secozzi.jellyfinmanager.presentation.serverlist.server.ServerScreenContent
 import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
+import xyz.secozzi.jellyfinmanager.presentation.utils.plus
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 
 @Serializable
@@ -61,15 +63,16 @@ fun ServerScreen(serverId: Long? = null) {
                     enabled = isValid,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(WindowInsets.navigationBars.asPaddingValues())
-                        .padding(horizontal = MaterialTheme.spacing.medium),
+                        .padding(
+                            WindowInsets.navigationBars.asPaddingValues() + PaddingValues(
+                                horizontal = MaterialTheme.spacing.medium,
+                            ),
+                        ),
                 ) {
                     when ((state as ServerScreenViewModel.State.Success).saveState) {
                         ServerScreenViewModel.State.SaveState.Error -> Icon(Icons.Default.Error, null)
                         ServerScreenViewModel.State.SaveState.Idle -> Text(
-                            if (serverId ==
-                                null
-                            ) {
+                            if (serverId == null) {
                                 "Add server"
                             } else {
                                 "Edit server"
@@ -96,7 +99,7 @@ fun ServerScreen(serverId: Long? = null) {
             onSSHPrivateKeyChange = viewModel::onSSHPrivateKeyChange,
             onSSHBaseDirChange = viewModel::onSSHBaseDirChange,
             onSSHBaseDirBlacklistChange = viewModel::onSSHBaseDirBlacklistChange,
-            modifier = Modifier.padding(contentPadding),
+            paddingValues = contentPadding,
         )
     }
 }

@@ -4,7 +4,6 @@ import net.schmizz.sshj.SSHClient
 import xyz.secozzi.jellyfinmanager.data.ssh.ExecuteSSH
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.ssh.model.Directory
-import java.io.IOException
 
 class GetDirectories(
     private val executeSSH: ExecuteSSH,
@@ -13,22 +12,18 @@ class GetDirectories(
         sshClient: SSHClient?,
         server: Server,
         path: String,
-    ): Result<List<Directory>> {
-        val commandResult = try {
-            executeSSH(
-                server = server,
-                sshClient = sshClient,
-                commands = listOf(
-                    "/usr/bin/ls",
-                    path,
-                    "-l1h",
-                    "--full-time",
-                    "--group-directories-first",
-                ),
-            )
-        } catch (e: IOException) {
-            return Result.failure(e)
-        }
+    ): List<Directory> {
+        val commandResult = executeSSH(
+            server = server,
+            sshClient = sshClient,
+            commands = listOf(
+                "/usr/bin/ls",
+                path,
+                "-l1h",
+                "--full-time",
+                "--group-directories-first",
+            ),
+        )
 
         val directories = lsRegex.findAll(commandResult).map { m ->
             val (type, count, size, date, time, name) = m.destructured
@@ -55,18 +50,17 @@ class GetDirectories(
             )
         }.toList()
 
-        val filtered = if (server.sshBaseDirBlacklist.isBlank()) {
+        return if (server.sshBaseDirBlacklist.isBlank()) {
             directories
         } else {
             val blacklist = server.sshBaseDirBlacklist.split(',')
             directories.filterNot { it.name in blacklist }
         }
-        return Result.success(filtered)
     }
 
     private val lsRegex =
         Regex(
-            """([d\-])[\w-]{9}\s+(\d+)\s+\S+\s+\S+\s+(\S+)\s+(\S+)\s+(\S+)\s+\S+\s+(.+)${'$'}""",
+            """([d\-])[\w-]{9}\s+(\d+)\s+\S+\s+\S+\s+(\S+)\s+(\S+)\s+(\S+)\s+\S+\s+(.+)$""",
             RegexOption.MULTILINE,
         )
 }

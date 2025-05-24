@@ -62,28 +62,6 @@ fun <T, R> combineRefreshable(
     }
 
 context(viewModel: StateViewModel)
-@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
-fun <T, R> combineRefreshableResult(
-    flow: Flow<T>,
-    flow2: Flow<Unit>,
-    getResult: suspend (T) -> Result<R>,
-): Flow<Result<R>> = combine(
-    flow,
-    flow2.onStart { emit(Unit) },
-) { data, _ -> data }
-    .onEach { _ -> viewModel.mutableState.update { _ -> UIState.Loading } }
-    .mapLatest { data -> getResult(data) }
-    .onEach { result ->
-        viewModel.mutableState.update { _ ->
-            if (result.isFailure) {
-                UIState.Error(result.exceptionOrNull()!!)
-            } else {
-                UIState.Success
-            }
-        }
-    }
-
-context(viewModel: StateViewModel)
 fun <T> Flow<Result<T>>.asStateFlow(
     scope: CoroutineScope = viewModel.viewModelScope,
     started: SharingStarted = SharingStarted.WhileSubscribed(5.seconds),

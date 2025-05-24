@@ -27,13 +27,17 @@ class JellyfinSearchScreenViewModel(
     fun search(query: String) {
         mutableState.update { _ -> UIState.Loading }
         viewModelScope.launch {
-            val searchResult = jellyfinRepository.searchSeries(
-                id = searchRoute.itemId,
-                searchProvider = JellyfinSearchProvider.AniList.providerName,
-                searchQuery = query,
-            )
-            _items.update { _ -> searchResult }
-            mutableState.update { _ -> UIState.Success }
+            try {
+                val searchResult = jellyfinRepository.searchSeries(
+                    id = searchRoute.itemId,
+                    searchProvider = JellyfinSearchProvider.AniList.providerName,
+                    searchQuery = query,
+                )
+                _items.update { _ -> searchResult }
+                mutableState.update { _ -> UIState.Success }
+            } catch (e: Exception) {
+                mutableState.update { _ -> UIState.Error(e) }
+            }
         }
     }
 }

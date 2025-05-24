@@ -2,6 +2,8 @@ package xyz.secozzi.jellyfinmanager.presentation.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -16,12 +18,12 @@ import androidx.compose.ui.unit.dp
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 
 @Composable
-fun ErrorScreenContent(
+fun ErrorScreen(
     error: Throwable,
-    modifier: Modifier = Modifier,
+    paddingValues: PaddingValues = PaddingValues(),
 ) {
     Column(
-        modifier = modifier,
+        modifier = Modifier.fillMaxSize().padding(paddingValues),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {

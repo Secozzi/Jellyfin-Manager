@@ -1,6 +1,5 @@
 package xyz.secozzi.jellyfinmanager.ui.jellyfin
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,23 +16,23 @@ import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.JellyfinRepository
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinItem
 import xyz.secozzi.jellyfinmanager.domain.server.ServerStateHolder
-import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
-import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState.Companion.asStateFlow
+import xyz.secozzi.jellyfinmanager.presentation.utils.StateViewModel
+import xyz.secozzi.jellyfinmanager.presentation.utils.asStateFlow
 import xyz.secozzi.jellyfinmanager.presentation.utils.combineRefreshable
 
-typealias ItemList = List<Pair<String, UUID?>>
+typealias ItemPath = List<Pair<String, UUID?>>
 
 class JellyfinScreenViewModel(
     private val jellyfinRepository: JellyfinRepository,
     private val serverStateHolder: ServerStateHolder,
-) : ViewModel() {
+) : StateViewModel() {
     private val hasInitializedServer = MutableStateFlow(false)
     private val refreshFlow = MutableSharedFlow<Unit>()
 
     private val _jfData = MutableStateFlow<JellyfinVMData>(JellyfinVMData.EMPTY)
     val jfData = _jfData.asStateFlow()
 
-    val state = combineRefreshable(
+    val items = combineRefreshable(
         jfData.filter { it.server != null },
         refreshFlow,
     ) { jfData ->
@@ -42,11 +41,10 @@ class JellyfinScreenViewModel(
             hasInitializedServer.update { _ -> true }
         }
 
-        getLibraries(jfData.itemList)
+        getLibraries(jfData.itemPath)
     }.asStateFlow()
 
     init {
-
         viewModelScope.launch {
             serverStateHolder.selectedServer.filterNotNull().collectLatest { selected ->
                 hasInitializedServer.update { _ -> false }
@@ -54,36 +52,35 @@ class JellyfinScreenViewModel(
                 _jfData.update { _ ->
                     JellyfinVMData(
                         server = selected,
-                        itemList = listOf(Pair("Home", null)),
+                        itemPath = listOf(Pair("Home", null)),
                     )
                 }
             }
         }
     }
 
-    private suspend fun getLibraries(itemList: ItemList): RequestState<JellyfinItemList> {
-        val items = when (itemList.size) {
+    private suspend fun getLibraries(itemPath: ItemPath): JellyfinItemList {
+        return when (itemPath.size) {
             1 -> JellyfinItemList.Libraries(jellyfinRepository.getLibraries())
             else -> {
-                val items = jellyfinRepository.getItems(itemList.last().second)
-                if (itemList.size == 2) {
+                val items = jellyfinRepository.getItems(itemPath.last().second)
+                if (itemPath.size == 2) {
                     JellyfinItemList.Series(items)
                 } else {
-                    JellyfinItemList.Seasons(items, itemList.last().second!!)
+                    JellyfinItemList.Seasons(items, itemPath.last().second!!)
                 }
             }
         }
-        return RequestState.Success(items)
     }
 
     fun onNavigateTo(index: Int) {
-        if (index == jfData.value.itemList.lastIndex) {
+        if (index == jfData.value.itemPath.lastIndex) {
             return
         }
 
         _jfData.update { data ->
             data.copy(
-                itemList = data.itemList.subList(0, index + 1),
+                itemPath = data.itemPath.subList(0, index + 1),
             )
         }
     }
@@ -91,19 +88,19 @@ class JellyfinScreenViewModel(
     fun onClickItem(item: JellyfinItem) {
         _jfData.update { data ->
             data.copy(
-                itemList = data.itemList + Pair(item.name, item.id),
+                itemPath = data.itemPath + Pair(item.name, item.id),
             )
         }
     }
 
     data class JellyfinVMData(
         val server: Server?,
-        val itemList: ItemList,
+        val itemPath: ItemPath,
     ) {
         companion object {
             val EMPTY = JellyfinVMData(
                 server = null,
-                itemList = emptyList(),
+                itemPath = emptyList(),
             )
         }
     }

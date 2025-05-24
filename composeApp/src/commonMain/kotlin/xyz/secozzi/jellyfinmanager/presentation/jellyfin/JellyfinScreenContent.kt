@@ -1,47 +1,44 @@
 package xyz.secozzi.jellyfinmanager.presentation.jellyfin
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import org.jellyfin.sdk.model.UUID
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinItem
 import xyz.secozzi.jellyfinmanager.presentation.jellyfin.browse.JellyfinBrowseScreen
-import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreenContent
-import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreenContent
+import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreen
+import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreen
 import xyz.secozzi.jellyfinmanager.presentation.ssh.components.PathLevelIndication
-import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
+import xyz.secozzi.jellyfinmanager.presentation.utils.UIState
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinScreenViewModel.JellyfinItemList
 
 @Composable
 fun JellyfinScreenContent(
-    state: RequestState<JellyfinItemList>,
-    itemList: List<Pair<String, UUID?>>,
+    state: UIState,
+    items: Result<JellyfinItemList>,
+    itemPath: List<Pair<String, UUID?>>,
     onNavigateTo: (Int) -> Unit,
     onClickItem: (JellyfinItem) -> Unit,
     onClickEditSeries: () -> Unit,
 ) {
     Column {
         PathLevelIndication(
-            pathList = itemList.map { it.first },
+            pathList = itemPath.map { it.first },
             onNavigateTo = onNavigateTo,
         )
 
-        if (state.isLoading() || state.isIdle()) {
-            LoadingScreenContent()
+        if (state.isWaiting()) {
+            LoadingScreen()
             return@Column
         }
 
         if (state.isError()) {
-            ErrorScreenContent(
+            ErrorScreen(
                 error = state.getError(),
-                modifier = Modifier.fillMaxSize(),
             )
             return@Column
         }
 
-        val jellyfinItems = state.getSuccessData()
-
+        val jellyfinItems = items.getOrThrow()
         JellyfinBrowseScreen(
             jellyfinItems = jellyfinItems,
             onClickItem = onClickItem,

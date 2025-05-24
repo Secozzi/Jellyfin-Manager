@@ -37,17 +37,18 @@ import dev.materii.pullrefresh.PullRefreshLayout
 import dev.materii.pullrefresh.PullRefreshState
 import xyz.secozzi.jellyfinmanager.domain.ssh.model.Directory
 import xyz.secozzi.jellyfinmanager.presentation.components.MaterialPullRefreshIndicator
-import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreenContent
-import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreenContent
+import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreen
+import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreen
 import xyz.secozzi.jellyfinmanager.presentation.ssh.components.PathLevelIndication
-import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
+import xyz.secozzi.jellyfinmanager.presentation.utils.UIState
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 import xyz.secozzi.jellyfinmanager.utils.Platform
 import xyz.secozzi.jellyfinmanager.utils.platform
 
 @Composable
 fun SSHScreenContent(
-    state: RequestState<List<Directory>>,
+    state: UIState,
+    directories: Result<List<Directory>>,
     pathList: List<String>,
     ptrState: PullRefreshState,
     onClickDirectory: (Directory) -> Unit,
@@ -64,7 +65,7 @@ fun SSHScreenContent(
         },
         contentWindowInsets = ScaffoldDefaults.contentWindowInsets
             .exclude(NavigationBarDefaults.windowInsets),
-    ) {
+    ) { contentPadding ->
         Column {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -85,21 +86,20 @@ fun SSHScreenContent(
                 }
             }
 
-            if (state.isLoading() || state.isIdle()) {
-                LoadingScreenContent()
+            if (state.isWaiting()) {
+                LoadingScreen(contentPadding)
                 return@Scaffold
             }
 
             if (state.isError()) {
-                ErrorScreenContent(
+                ErrorScreen(
                     error = state.getError(),
-                    modifier = Modifier.fillMaxSize(),
+                    paddingValues = contentPadding,
                 )
                 return@Scaffold
             }
 
-            val directories = state.getSuccessData()
-
+            val directories = directories.getOrThrow()
             PullRefreshLayout(
                 state = ptrState,
                 indicator = { MaterialPullRefreshIndicator(ptrState) },

@@ -7,12 +7,12 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinSearchResult
 import xyz.secozzi.jellyfinmanager.presentation.jellyfin.components.JellyfinEntryItem
 import xyz.secozzi.jellyfinmanager.presentation.utils.isLandscapeMode
+import xyz.secozzi.jellyfinmanager.presentation.utils.plus
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 
 @Composable
@@ -20,7 +20,7 @@ fun JellyfinSearchScreenContent(
     selectedId: String?,
     items: ImmutableList<JellyfinSearchResult>,
     onClickItem: (String?) -> Unit,
-    modifier: Modifier = Modifier,
+    paddingValues: PaddingValues = PaddingValues(),
 ) {
     val aspectRatio = 2f / 3f
     val columns = if (isLandscapeMode()) {
@@ -31,8 +31,7 @@ fun JellyfinSearchScreenContent(
 
     LazyVerticalGrid(
         columns = columns,
-        modifier = modifier,
-        contentPadding = PaddingValues(
+        contentPadding = paddingValues + PaddingValues(
             vertical = MaterialTheme.spacing.medium,
             horizontal = MaterialTheme.spacing.small,
         ),

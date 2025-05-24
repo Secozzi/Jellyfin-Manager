@@ -3,6 +3,7 @@ package xyz.secozzi.jellyfinmanager.presentation.jellyfin.entry
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -16,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import xyz.secozzi.jellyfinmanager.presentation.jellyfin.entry.components.EditableDropdown
 import xyz.secozzi.jellyfinmanager.presentation.theme.DISABLED_ALPHA
+import xyz.secozzi.jellyfinmanager.presentation.utils.plus
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryScreenViewModel.JellyfinEntryDetails
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 
@@ -27,14 +29,16 @@ fun JellyfinEntryScreenContent(
     onDescriptionChange: (String) -> Unit,
     onGenreChange: (String) -> Unit,
     onSeasonNumberChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
+    paddingValues: PaddingValues,
 ) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .padding(
-                start = MaterialTheme.spacing.medium,
-                end = MaterialTheme.spacing.medium,
-                bottom = MaterialTheme.spacing.medium,
+                paddingValues + PaddingValues(
+                    start = MaterialTheme.spacing.medium,
+                    end = MaterialTheme.spacing.medium,
+                    bottom = MaterialTheme.spacing.medium,
+                ),
             )
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),

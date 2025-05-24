@@ -11,7 +11,6 @@ import org.jellyfin.sdk.model.api.BaseItemKind
 import org.koin.compose.viewmodel.koinViewModel
 import xyz.secozzi.jellyfinmanager.presentation.jellyfin.JellyfinScreenContent
 import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
-import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryRoute
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryRouteData
 
@@ -24,16 +23,18 @@ fun JellyfinScreen() {
     val navigator = LocalNavController.current
     val viewModel = koinViewModel<JellyfinScreenViewModel>()
 
-    val state by viewModel.state.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsState()
+    val items by viewModel.items.collectAsStateWithLifecycle()
     val jfData by viewModel.jfData.collectAsState()
 
-    BackHandler(jfData.itemList.size > 1) {
-        viewModel.onNavigateTo(jfData.itemList.size - 2)
+    BackHandler(jfData.itemPath.size > 1) {
+        viewModel.onNavigateTo(jfData.itemPath.size - 2)
     }
 
     JellyfinScreenContent(
         state = state,
-        itemList = jfData.itemList,
+        items = items,
+        itemPath = jfData.itemPath,
         onNavigateTo = viewModel::onNavigateTo,
         onClickItem = {
             when (it.type) {
@@ -57,9 +58,7 @@ fun JellyfinScreen() {
             }
         },
         onClickEditSeries = {
-            val id = (
-                (state as RequestState.Success).data as JellyfinScreenViewModel.JellyfinItemList.Seasons
-                ).seriesId
+            val id = (items.getOrThrow() as JellyfinScreenViewModel.JellyfinItemList.Seasons).seriesId
 
             navigator.navigate(
                 route = JellyfinEntryRoute(

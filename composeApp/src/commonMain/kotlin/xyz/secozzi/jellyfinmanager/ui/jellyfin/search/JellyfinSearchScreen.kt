@@ -1,5 +1,6 @@
 package xyz.secozzi.jellyfinmanager.ui.jellyfin.search
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,11 +26,12 @@ import org.jellyfin.sdk.model.UUID
 import org.jellyfin.sdk.model.serializer.UUIDSerializer
 import org.koin.compose.viewmodel.koinViewModel
 import xyz.secozzi.jellyfinmanager.presentation.jellyfin.search.JellyfinSearchScreenContent
-import xyz.secozzi.jellyfinmanager.presentation.jellyfin.search.JellyfinSearchTopBar
-import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreenContent
-import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreenContent
+import xyz.secozzi.jellyfinmanager.presentation.jellyfin.search.components.JellyfinSearchTopBar
+import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreen
+import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreen
 import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
 import xyz.secozzi.jellyfinmanager.presentation.utils.UIState
+import xyz.secozzi.jellyfinmanager.presentation.utils.plus
 import xyz.secozzi.jellyfinmanager.presentation.utils.serializableType
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryScreenViewModel.Companion.SEARCH_RESULT_KEY
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
@@ -86,9 +88,13 @@ fun JellyfinSearchScreen(searchQuery: String) {
                     enabled = state.isSuccess(),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(WindowInsets.navigationBars.asPaddingValues())
-                        .padding(horizontal = MaterialTheme.spacing.medium)
-                        .padding(bottom = if (platform == Platform.Desktop) MaterialTheme.spacing.small else 0.dp),
+                        .padding(
+                            WindowInsets.navigationBars.asPaddingValues() + PaddingValues(
+                                start = MaterialTheme.spacing.medium,
+                                end = MaterialTheme.spacing.medium,
+                                bottom = if (platform == Platform.Desktop) MaterialTheme.spacing.small else 0.dp,
+                            ),
+                        ),
                 ) {
                     Text("Select")
                 }
@@ -98,17 +104,20 @@ fun JellyfinSearchScreen(searchQuery: String) {
         when (state) {
             UIState.Idle -> {}
             UIState.Loading -> {
-                LoadingScreenContent()
+                LoadingScreen(contentPadding)
             }
             is UIState.Error -> {
-                ErrorScreenContent(state.getError())
+                ErrorScreen(
+                    error = state.getError(),
+                    paddingValues = contentPadding,
+                )
             }
             UIState.Success -> {
                 JellyfinSearchScreenContent(
                     selectedId = selectedId,
                     items = items.toPersistentList(),
                     onClickItem = { selectedId = it },
-                    modifier = Modifier.padding(contentPadding),
+                    paddingValues = contentPadding,
                 )
             }
         }

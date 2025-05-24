@@ -1,4 +1,4 @@
-package xyz.secozzi.jellyfinmanager.presentation.jellyfin.search
+package xyz.secozzi.jellyfinmanager.presentation.jellyfin.search.components
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.fillMaxWidth

@@ -2,6 +2,7 @@ package xyz.secozzi.jellyfinmanager.presentation.serverlist
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,39 +19,42 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
-import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreenContent
-import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreenContent
+import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreen
+import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreen
 import xyz.secozzi.jellyfinmanager.presentation.serverlist.components.ServerListItem
-import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
+import xyz.secozzi.jellyfinmanager.presentation.utils.UIState
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 
 @Composable
 fun ServerListScreenContent(
-    state: RequestState<List<Server>>,
+    state: UIState,
+    servers: List<Server>,
     onClickEdit: (Server) -> Unit,
     onClickDelete: (Server) -> Unit,
     onClickMoveUp: (Server) -> Unit,
     onClickMoveDown: (Server) -> Unit,
-    modifier: Modifier = Modifier,
+    paddingValues: PaddingValues,
 ) {
     val lazyListState = rememberLazyListState()
 
-    if (state.isLoading() || state.isIdle()) {
-        LoadingScreenContent()
+    if (state.isWaiting()) {
+        LoadingScreen(paddingValues)
         return
     }
 
     if (state.isError()) {
-        ErrorScreenContent(state.getError())
+        ErrorScreen(
+            error = state.getError(),
+            paddingValues = paddingValues,
+        )
         return
     }
 
-    val serverList = state.getSuccessData()
-
-    if (serverList.isEmpty()) {
+    if (servers.isEmpty()) {
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
+                .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -65,13 +69,13 @@ fun ServerListScreenContent(
     }
 
     ServerListContent(
-        serverList = serverList,
+        serverList = servers,
         lazyListState = lazyListState,
         onClickEdit = onClickEdit,
         onClickDelete = onClickDelete,
         onMoveUp = onClickMoveUp,
         onMoveDown = onClickMoveDown,
-        modifier = modifier.padding(
+        modifier = Modifier.padding(paddingValues).padding(
             top = MaterialTheme.spacing.small,
             start = MaterialTheme.spacing.medium,
             end = MaterialTheme.spacing.medium,

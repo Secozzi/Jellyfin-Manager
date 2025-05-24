@@ -1,6 +1,5 @@
 package xyz.secozzi.jellyfinmanager.ui.preferences.serverlist
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -13,7 +12,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.serialization.Serializable
 import org.koin.compose.viewmodel.koinViewModel
 import xyz.secozzi.jellyfinmanager.presentation.serverlist.ServerListScreenContent
@@ -27,9 +26,10 @@ data object ServerListRoute
 @Composable
 fun ServerListScreen() {
     val navigator = LocalNavController.current
-
     val viewModel = koinViewModel<ServerListScreenViewModel>()
+
     val state by viewModel.state.collectAsState()
+    val servers by viewModel.servers.collectAsStateWithLifecycle()
     val dialog by viewModel.dialog.collectAsState()
 
     when (dialog) {
@@ -67,13 +67,14 @@ fun ServerListScreen() {
     ) { contentPadding ->
         ServerListScreenContent(
             state = state,
+            servers = servers,
             onClickEdit = {
                 navigator.navigate(ServerRoute(it.id))
             },
             onClickDelete = { viewModel.showDialog(ServerListScreenViewModel.ServerListDialog.Delete(it)) },
             onClickMoveUp = viewModel::moveUp,
             onClickMoveDown = viewModel::moveDown,
-            modifier = Modifier.padding(contentPadding),
+            paddingValues = contentPadding,
         )
     }
 }

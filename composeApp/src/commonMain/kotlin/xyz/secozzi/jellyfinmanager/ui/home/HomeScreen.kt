@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -39,10 +40,9 @@ import kotlinx.collections.immutable.toPersistentList
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
-import xyz.secozzi.jellyfinmanager.domain.database.models.Server
-import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreenContent
+import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreen
 import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
-import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
+import xyz.secozzi.jellyfinmanager.presentation.utils.UIState
 import xyz.secozzi.jellyfinmanager.ui.home.components.DropDown
 import xyz.secozzi.jellyfinmanager.ui.home.components.NoServerContent
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinRoute
@@ -65,17 +65,18 @@ fun HomeScreen() {
     val viewModel = koinViewModel<HomeScreenViewModel>()
     val selectedServer by viewModel.selectedServer.collectAsState()
     val state by viewModel.state.collectAsState()
+    val servers by viewModel.servers.collectAsState()
 
     val tabs = persistentListOf(
-        BottomBarRoute("SSH", SSHRoute, Icons.Default.Terminal),
         BottomBarRoute("Jellyfin", JellyfinRoute, vectorResource(Res.drawable.jellyfin)),
+        BottomBarRoute("SSH", SSHRoute, Icons.Default.Terminal),
     )
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    state.getSuccessDataOrNull()?.let { serverList ->
+                    servers.takeIf { it.isNotEmpty() }?.let { serverList ->
                         DropDown(
                             server = selectedServer!!,
                             values = serverList.toPersistentList(),
@@ -107,8 +108,9 @@ fun HomeScreen() {
                         NavigationBarItem(
                             icon = { Icon(bottomRoute.icon, contentDescription = bottomRoute.name) },
                             label = { Text(bottomRoute.name) },
-                            selected =
-                            currentDestination?.hierarchy?.any { it.hasRoute(bottomRoute.route::class) } == true,
+                            selected = currentDestination
+                                ?.hierarchy
+                                ?.any { it.hasRoute(bottomRoute.route::class) } == true,
                             onClick = {
                                 tabNavigator.navigate(bottomRoute.route) {
                                     popUpTo(tabNavigator.graph.findStartDestination().id) {
@@ -128,7 +130,7 @@ fun HomeScreen() {
         HomeScreenContent(
             tabNavigator = tabNavigator,
             state = state,
-            modifier = Modifier.padding(contentPadding),
+            paddingValues = contentPadding,
         )
     }
 }
@@ -136,15 +138,15 @@ fun HomeScreen() {
 @Composable
 private fun HomeScreenContent(
     tabNavigator: NavHostController,
-    state: RequestState<List<Server>>,
-    modifier: Modifier = Modifier,
+    state: UIState,
+    paddingValues: PaddingValues,
 ) {
     val navigator = LocalNavController.current
 
-    Surface(modifier) {
+    Surface(modifier = Modifier.padding(paddingValues)) {
         when {
-            state.isIdle() || state.isLoading() -> {
-                LoadingScreenContent()
+            state.isWaiting() -> {
+                LoadingScreen()
             }
             state.isError() -> {
                 NoServerContent(
@@ -154,7 +156,7 @@ private fun HomeScreenContent(
             else -> {
                 NavHost(
                     navController = tabNavigator,
-                    startDestination = SSHRoute,
+                    startDestination = JellyfinRoute,
                 ) {
                     composable<JellyfinRoute> { JellyfinScreen() }
                     composable<SSHRoute> { SSHScreen() }

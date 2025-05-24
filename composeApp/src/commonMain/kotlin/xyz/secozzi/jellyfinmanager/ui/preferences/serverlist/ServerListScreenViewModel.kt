@@ -1,6 +1,5 @@
 package xyz.secozzi.jellyfinmanager.ui.preferences.serverlist
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -9,28 +8,29 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.usecase.ServerUseCase
-import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
+import xyz.secozzi.jellyfinmanager.presentation.utils.StateViewModel
+import xyz.secozzi.jellyfinmanager.presentation.utils.UIState
 
 class ServerListScreenViewModel(
     private val serverUseCase: ServerUseCase,
-) : ViewModel() {
+) : StateViewModel() {
     private val _dialog = MutableStateFlow<ServerListDialog>(ServerListDialog.None)
     val dialog = _dialog.asStateFlow()
 
-    val state: StateFlow<RequestState<List<Server>>> = serverUseCase.getServers()
-        .map { RequestState.Success(it) }
-        .catch { RequestState.Error(it) }
+    val servers: StateFlow<List<Server>> = serverUseCase.getServers()
+        .onEach { mutableState.update { _ -> UIState.Success } }
+        .catch { mutableState.update { _ -> UIState.Error(it) } }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = RequestState.Idle,
+            initialValue = emptyList(),
         )
 
     fun moveUp(server: Server) {
