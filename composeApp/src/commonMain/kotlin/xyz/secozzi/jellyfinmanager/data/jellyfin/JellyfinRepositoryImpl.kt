@@ -4,8 +4,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.jellyfin.sdk.api.client.ApiClient
 import org.jellyfin.sdk.api.client.extensions.authenticateUserByName
+import org.jellyfin.sdk.api.client.extensions.itemLookupApi
 import org.jellyfin.sdk.api.client.extensions.itemUpdateApi
 import org.jellyfin.sdk.api.client.extensions.itemsApi
+import org.jellyfin.sdk.api.client.extensions.searchApi
 import org.jellyfin.sdk.api.client.extensions.userApi
 import org.jellyfin.sdk.api.client.extensions.userLibraryApi
 import org.jellyfin.sdk.model.UUID
@@ -14,15 +16,18 @@ import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.ItemFields
 import org.jellyfin.sdk.model.api.ItemSortBy
 import org.jellyfin.sdk.model.api.NameGuidPair
+import org.jellyfin.sdk.model.api.SeriesInfo
+import org.jellyfin.sdk.model.api.SeriesInfoRemoteSearchQuery
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.JellyfinRepository
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinCollection
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinItem
+import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinSearchResult
+import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinSeries
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinUser
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.toJellyfinCollection
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.toJellyfinItem
 
-// This does not handle process death at all, but I don't really care
 class JellyfinRepositoryImpl(
     private val apiClient: ApiClient,
 ) : JellyfinRepository {
@@ -93,6 +98,29 @@ class JellyfinRepositoryImpl(
                 itemId = id,
                 data = item,
             )
+        }
+    }
+
+    override suspend fun searchSeries(id: UUID, searchProvider: String, searchQuery: String): List<JellyfinSearchResult> {
+        return withContext(Dispatchers.IO) {
+            apiClient.itemLookupApi.getSeriesRemoteSearchResults(
+                data = SeriesInfoRemoteSearchQuery(
+                    searchInfo = SeriesInfo(
+                        name = searchQuery,
+                        isAutomated = false,
+                    ),
+                    itemId = id,
+                    searchProviderName = searchProvider,
+                    includeDisabledProviders = true,
+                )
+            ).content.map { searchItem ->
+                JellyfinSearchResult(
+                    name = searchItem.name ?: "",
+                    year = searchItem.productionYear,
+                    imageUrl = searchItem.imageUrl,
+                    id = searchItem.providerIds?.get(searchProvider)
+                )
+            }
         }
     }
 }

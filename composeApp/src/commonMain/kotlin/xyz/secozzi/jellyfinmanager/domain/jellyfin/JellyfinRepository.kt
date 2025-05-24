@@ -6,6 +6,8 @@ import org.jellyfin.sdk.model.api.BaseItemKind
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinCollection
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinItem
+import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinSearchResult
+import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinSeries
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinUser
 
 interface JellyfinRepository {
@@ -18,4 +20,6 @@ interface JellyfinRepository {
     suspend fun getItem(id: UUID): BaseItemDto
 
     suspend fun updateItem(id: UUID, type: BaseItemKind, item: BaseItemDto)
+
+    suspend fun searchSeries(id: UUID, searchProvider: String, searchQuery: String): List<JellyfinSearchResult>
 }

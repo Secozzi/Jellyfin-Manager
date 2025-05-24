@@ -1,7 +1,6 @@
 package xyz.secozzi.jellyfinmanager.ui.jellyfin.entry
 
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,14 +13,15 @@ import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.NameGuidPair
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.JellyfinRepository
-import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState
-import xyz.secozzi.jellyfinmanager.presentation.utils.RequestState.Companion.asStateFlow
+import xyz.secozzi.jellyfinmanager.presentation.utils.StateViewModel
+import xyz.secozzi.jellyfinmanager.presentation.utils.UIState
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinScreenViewModel
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryScreenViewModel.JellyfinEntryDetails.Companion.toEntryDetails
 
 class JellyfinEntryScreenViewModel(
     savedStateHandle: SavedStateHandle,
     private val jellyfinRepository: JellyfinRepository,
-) : ViewModel() {
+) : StateViewModel() {
     val entryRoute = savedStateHandle.toRoute<JellyfinEntryRoute>(
         typeMap = JellyfinEntryRoute.typeMap,
     )
@@ -32,31 +32,38 @@ class JellyfinEntryScreenViewModel(
     private val _details = MutableStateFlow<JellyfinEntryDetails>(JellyfinEntryDetails.EMPTY)
     val details = _details.asStateFlow()
 
-    private val _item = MutableStateFlow<RequestState<BaseItemDto>>(RequestState.Idle)
-    val item = _item.asStateFlow()
+    private val itemFlow = MutableStateFlow<BaseItemDto?>(null)
 
     init {
         viewModelScope.launch {
             try {
                 jellyfinRepository.getItem(entryRoute.data.itemId).let { item ->
                     _details.update { _ -> item.toEntryDetails() }
-                    _item.update { _ -> RequestState.Success(item) }
+                    itemFlow.update { _ -> item }
 
-                    getSeasonNumber(item.path ?: "")?.let {
-                        onSeasonNumberChange(it)
+                    if (entryRoute.data.itemType == JellyfinScreenViewModel.JellyfinItemType.Season) {
+                        getSeasonNumber(item.path ?: "")?.let {
+                            onSeasonNumberChange(it)
+                        }
                     }
+
+                    mutableState.update { _ -> UIState.Success }
                 }
             } catch (e: Exception) {
-                _item.update { _ -> RequestState.Error(e) }
+                mutableState.update { _ -> UIState.Error(e) }
             }
         }
+    }
+
+    fun onSearch(id: String) {
+
     }
 
     fun save() {
         val id = entryRoute.data.itemId
 
         val details = details.value
-        val itemData = item.value.getSuccessData()
+        val itemData = itemFlow.value!!
 
         val item = itemData
             .copy(
@@ -187,6 +194,8 @@ class JellyfinEntryScreenViewModel(
     }
 
     companion object {
+        const val SEARCH_RESULT_KEY = "search_result_key"
+
         private val SEASON_REGEX_LIST = listOf(
             Regex("""Season (\d+)"""),
             Regex("""^(\d+)"""),

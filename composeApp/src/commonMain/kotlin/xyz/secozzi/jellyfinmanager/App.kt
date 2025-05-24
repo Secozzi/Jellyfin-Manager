@@ -27,6 +27,8 @@ import xyz.secozzi.jellyfinmanager.ui.providers.LocalToaster
 import xyz.secozzi.jellyfinmanager.ui.home.HomeRoute
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryRoute
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryScreen
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.JellyfinSearchScreen
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.SearchRoute
 import xyz.secozzi.jellyfinmanager.ui.preferences.AppearancePreferencesRoute
 import xyz.secozzi.jellyfinmanager.ui.preferences.AppearancePreferencesScreen
 import xyz.secozzi.jellyfinmanager.ui.preferences.PreferencesRoute
@@ -92,8 +94,12 @@ fun Navigator() {
             composable<ServerRoute> { ServerScreen(it.toRoute<ServerRoute>().id) }
 
             composable<JellyfinEntryRoute>(typeMap = JellyfinEntryRoute.typeMap) {
-                val itemType = it.toRoute<JellyfinEntryRoute>().data.itemType
-                JellyfinEntryScreen(itemType)
+                val data = it.toRoute<JellyfinEntryRoute>().data
+                JellyfinEntryScreen(it, data.itemType, data.itemId)
+            }
+            composable<SearchRoute>(typeMap = SearchRoute.typeMap) {
+                val searchQuery = it.toRoute<SearchRoute>().data.searchQuery
+                JellyfinSearchScreen(searchQuery)
             }
         }
     }
