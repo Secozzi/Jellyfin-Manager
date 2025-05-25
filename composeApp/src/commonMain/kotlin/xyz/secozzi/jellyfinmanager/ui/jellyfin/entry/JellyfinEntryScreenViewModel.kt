@@ -12,6 +12,7 @@ import org.jellyfin.sdk.model.UUID
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
 import org.jellyfin.sdk.model.api.NameGuidPair
+import xyz.secozzi.jellyfinmanager.domain.anilist.AnilistRepository
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.JellyfinRepository
 import xyz.secozzi.jellyfinmanager.presentation.utils.StateViewModel
 import xyz.secozzi.jellyfinmanager.presentation.utils.UIState
@@ -21,6 +22,7 @@ import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryScreenViewMode
 class JellyfinEntryScreenViewModel(
     savedStateHandle: SavedStateHandle,
     private val jellyfinRepository: JellyfinRepository,
+    private val anilistRepository: AnilistRepository,
 ) : StateViewModel() {
     val entryRoute = savedStateHandle.toRoute<JellyfinEntryRoute>(
         typeMap = JellyfinEntryRoute.typeMap,
@@ -56,6 +58,26 @@ class JellyfinEntryScreenViewModel(
     }
 
     fun onSearch(id: String) {
+        val remoteId = id.toLongOrNull() ?: return
+        mutableState.update { _ -> UIState.Loading }
+        viewModelScope.launch {
+            try {
+                anilistRepository.getDetails(remoteId)?.let {
+                    _details.update { details ->
+                        details.copy(
+                            title = it.titles.first(),
+                            titleList = it.titles,
+                            studio = it.studio.joinToString(),
+                            description = it.description ?: details.description,
+                            genre = it.genre.joinToString(),
+                        )
+                    }
+                }
+                mutableState.update { _ -> UIState.Success }
+            } catch (e: Exception) {
+                mutableState.update { _ -> UIState.Error(e) }
+            }
+        }
     }
 
     fun save() {

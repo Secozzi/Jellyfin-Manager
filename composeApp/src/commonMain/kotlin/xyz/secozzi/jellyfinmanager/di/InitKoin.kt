@@ -9,10 +9,12 @@ fun initKoin(
     includes(
         PreferencesModule(datastorePath),
         StateHolderModule,
+        SerializationModule,
+        KtorModule,
         DatabaseModule,
         SSHModule,
-        SerializationModule,
         JellyfinModule,
+        AnilistModule,
         ViewModelsModule,
     )
 }

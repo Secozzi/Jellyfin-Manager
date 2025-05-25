@@ -66,6 +66,7 @@ kotlin {
             implementation(libs.sonner)
             implementation(libs.bundles.coil)
             implementation(libs.bundles.serialization.xml)
+            implementation(libs.bundles.ktor)
 
             api(libs.bundles.datastore)
             api(libs.bundles.koin)
@@ -85,6 +86,7 @@ kotlin {
         freeCompilerArgs.addAll(
             "-Xcontext-parameters",
             "-Xexpect-actual-classes",
+            "-Xmulti-dollar-interpolation",
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
         )
     }

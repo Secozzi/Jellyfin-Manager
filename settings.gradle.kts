@@ -26,6 +26,12 @@ dependencyResolutionManagement {
         }
         mavenCentral()
         maven("https://jitpack.io")
+        maven("https://s01.oss.sonatype.org/content/repositories/snapshots/") {
+            content {
+                // Only allow SDK snapshots
+                includeVersionByRegex("org\\.jellyfin\\.sdk", ".*", "master-SNAPSHOT")
+            }
+        }
     }
 }
 

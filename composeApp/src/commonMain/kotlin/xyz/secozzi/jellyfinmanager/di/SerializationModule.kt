@@ -1,11 +1,18 @@
 package xyz.secozzi.jellyfinmanager.di
 
+import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.XmlDeclMode
 import nl.adaptivity.xmlutil.core.XmlVersion
 import nl.adaptivity.xmlutil.serialization.XML
 import org.koin.dsl.module
 
 val SerializationModule = module {
+    single {
+        Json {
+            ignoreUnknownKeys = true
+        }
+    }
+
     single {
         XML {
             defaultPolicy {

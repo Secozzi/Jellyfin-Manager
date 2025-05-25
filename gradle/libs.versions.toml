@@ -27,11 +27,12 @@ bouncycastle = "1.78.1"
 sqliteJdbcCrypt = "3.49.1.0"
 sqlcipherAndroid = "4.7.2"
 ptr = "1.4.0-beta03"
-jellyfin = "1.6.8"
+jellyfin = "master-SNAPSHOT"
 kmp-uri = "0.0.19"
 coil = "3.1.0"
 xml-serialization = "0.91.0"
 sonner = "0.3.8"
+ktor = "3.1.3"
 
 [libraries]
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3-android" }
@@ -81,12 +82,19 @@ xml-serialization = { module = "io.github.pdvrieze.xmlutil:serialization", versi
 
 sonner = { module = "io.github.dokar3:sonner", version.ref = "sonner" }
 
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor"}
+ktor-client-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor"}
+ktor-client-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor"}
+
 [bundles]
 datastore = ["datastore-core", "datastore-preferences"]
 koin = ["koin-compose", "koin-core", "koin-compose-viewmodel", "koin-core-viewmodel"]
 compose-settings = ["compose-settings", "compose-settings-extended"]
 coil = ["coil-compose", "coil-network-okhttp"]
 serialization-xml = ["xml-core", "xml-serialization"]
+ktor = ["ktor-client-core", "ktor-client-logging", "ktor-client-okhttp", "ktor-client-negotiation", "ktor-client-json"]
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

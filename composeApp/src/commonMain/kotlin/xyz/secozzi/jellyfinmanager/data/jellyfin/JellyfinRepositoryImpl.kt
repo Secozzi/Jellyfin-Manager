@@ -31,25 +31,27 @@ class JellyfinRepositoryImpl(
     lateinit var jellyfinUser: JellyfinUser
 
     override suspend fun loadServer(server: Server) {
-        apiClient.update(
-            baseUrl = server.jfAddress,
-        )
-
-        val authResult by apiClient.userApi.authenticateUserByName(
-            username = server.jfUsername,
-            password = server.jfPassword,
-        )
-
-        apiClient.update(
-            accessToken = authResult.accessToken,
-        )
-
-        jellyfinUser = authResult.user?.let {
-            JellyfinUser(
-                name = it.name ?: "User",
-                id = it.id,
+        withContext(Dispatchers.IO) {
+            apiClient.update(
+                baseUrl = server.jfAddress,
             )
-        } ?: throw UnsupportedOperationException("Unable to retrieve user")
+
+            val authResult by apiClient.userApi.authenticateUserByName(
+                username = server.jfUsername,
+                password = server.jfPassword,
+            )
+
+            apiClient.update(
+                accessToken = authResult.accessToken,
+            )
+
+            jellyfinUser = authResult.user?.let {
+                JellyfinUser(
+                    name = it.name ?: "User",
+                    id = it.id,
+                )
+            } ?: throw UnsupportedOperationException("Unable to retrieve user")
+        }
     }
 
     override suspend fun getLibraries(): List<JellyfinCollection> {
