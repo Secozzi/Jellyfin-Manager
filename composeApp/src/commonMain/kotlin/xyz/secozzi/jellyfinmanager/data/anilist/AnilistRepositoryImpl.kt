@@ -8,8 +8,10 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.jellyfin.sdk.model.DateTime
 import xyz.secozzi.jellyfinmanager.domain.anilist.AnilistRepository
 import xyz.secozzi.jellyfinmanager.domain.anilist.models.AnilistDetails
+import xyz.secozzi.jellyfinmanager.domain.anilist.models.AnilistStatus
 
 class AnilistRepositoryImpl(
     private val client: HttpClient,
@@ -32,7 +34,34 @@ class AnilistRepositoryImpl(
             description = media.description,
             genre = media.genres,
             studio = media.studios.edges.filter { it.isMain }.map { it.node.name }.take(2),
+            startDate = media.startDate.let {
+                DateTime.of(
+                    it.year ?: DateTime.MIN.year,
+                    it.month ?: 1,
+                    it.day ?: 1,
+                    0,
+                    0,
+                )
+            },
+            endDate = media.endDate.let {
+                DateTime.of(
+                    it.year ?: DateTime.MIN.year,
+                    it.month ?: 1,
+                    it.day ?: 1,
+                    0,
+                    0,
+                )
+            },
+            status = media.status.toStatus(),
         )
+    }
+
+    private fun String?.toStatus(): AnilistStatus {
+        return when (this?.lowercase()) {
+            "finished" -> AnilistStatus.Completed
+            "releasing" -> AnilistStatus.Ongoing
+            else -> AnilistStatus.Unknown
+        }
     }
 }
 
@@ -53,6 +82,17 @@ const val DETAILS_QUERY = $$"""query ($id: Int) {
 				}
 			}
 		}
+		startDate {
+			year
+			month
+			day
+		}
+		endDate {
+			year
+			month
+			day
+		}
+		status
 	}
 }
 """

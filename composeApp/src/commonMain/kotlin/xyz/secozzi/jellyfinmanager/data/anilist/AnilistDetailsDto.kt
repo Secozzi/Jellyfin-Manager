@@ -29,6 +29,9 @@ data class AnilistDetailsDto(
             val description: String? = null,
             val genres: List<String>,
             val studios: StudiosDto,
+            val startDate: DateDto,
+            val endDate: DateDto,
+            val status: String? = null,
         ) {
             @Serializable
             data class TitleDto(
@@ -52,6 +55,13 @@ data class AnilistDetailsDto(
                     )
                 }
             }
+
+            @Serializable
+            data class DateDto(
+                val year: Int? = null,
+                val month: Int? = null,
+                val day: Int? = null,
+            )
         }
     }
 }

@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
 sealed class UIState {
@@ -71,3 +72,16 @@ fun <T> Flow<Result<T>>.asStateFlow(
     started = started,
     initialValue = initialValue,
 )
+
+context(viewModel: StateViewModel)
+fun executeCatching(block: suspend () -> Unit) {
+    viewModel.mutableState.update { _ -> UIState.Loading }
+    viewModel.viewModelScope.launch {
+        try {
+            block()
+            viewModel.mutableState.update { _ -> UIState.Success }
+        } catch (e: Exception) {
+            viewModel.mutableState.update { _ -> UIState.Error(e) }
+        }
+    }
+}

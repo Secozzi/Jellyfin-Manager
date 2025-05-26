@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import okio.IOException
+import org.jellyfin.sdk.model.DateTime
 import org.jellyfin.sdk.model.UUID
 import org.jellyfin.sdk.model.api.BaseItemDto
 import org.jellyfin.sdk.model.api.BaseItemKind
@@ -15,7 +16,7 @@ import org.jellyfin.sdk.model.api.NameGuidPair
 import xyz.secozzi.jellyfinmanager.domain.anilist.AnilistRepository
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.JellyfinRepository
 import xyz.secozzi.jellyfinmanager.presentation.utils.StateViewModel
-import xyz.secozzi.jellyfinmanager.presentation.utils.UIState
+import xyz.secozzi.jellyfinmanager.presentation.utils.executeCatching
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinScreenViewModel
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryScreenViewModel.JellyfinEntryDetails.Companion.toEntryDetails
 
@@ -37,45 +38,36 @@ class JellyfinEntryScreenViewModel(
     private val itemFlow = MutableStateFlow<BaseItemDto?>(null)
 
     init {
-        viewModelScope.launch {
-            try {
-                jellyfinRepository.getItem(entryRoute.data.itemId).let { item ->
-                    _details.update { _ -> item.toEntryDetails() }
-                    itemFlow.update { _ -> item }
+        executeCatching {
+            jellyfinRepository.getItem(entryRoute.data.itemId).let { item ->
+                _details.update { _ -> item.toEntryDetails() }
+                itemFlow.update { _ -> item }
 
-                    if (entryRoute.data.itemType == JellyfinScreenViewModel.JellyfinItemType.Season) {
-                        getSeasonNumber(item.path ?: "")?.let {
-                            onSeasonNumberChange(it)
-                        }
+                if (entryRoute.data.itemType == JellyfinScreenViewModel.JellyfinItemType.Season) {
+                    getSeasonNumber(item.path ?: "")?.let {
+                        onSeasonNumberChange(it)
                     }
-
-                    mutableState.update { _ -> UIState.Success }
                 }
-            } catch (e: Exception) {
-                mutableState.update { _ -> UIState.Error(e) }
             }
         }
     }
 
     fun onSearch(id: String) {
         val remoteId = id.toLongOrNull() ?: return
-        mutableState.update { _ -> UIState.Loading }
-        viewModelScope.launch {
-            try {
-                anilistRepository.getDetails(remoteId)?.let {
-                    _details.update { details ->
-                        details.copy(
-                            title = it.titles.first(),
-                            titleList = it.titles,
-                            studio = it.studio.joinToString(),
-                            description = it.description ?: details.description,
-                            genre = it.genre.joinToString(),
-                        )
-                    }
+        executeCatching {
+            anilistRepository.getDetails(remoteId)?.let {
+                _details.update { details ->
+                    details.copy(
+                        title = it.titles.first(),
+                        titleList = it.titles,
+                        studio = it.studio.joinToString(),
+                        description = it.description ?: details.description,
+                        genre = it.genre.joinToString(),
+                        startDate = it.startDate,
+                        endDate = it.endDate,
+                        status = it.status.jellyfinName,
+                    )
                 }
-                mutableState.update { _ -> UIState.Success }
-            } catch (e: Exception) {
-                mutableState.update { _ -> UIState.Error(e) }
             }
         }
     }
@@ -98,6 +90,10 @@ class JellyfinEntryScreenViewModel(
                     )
                 },
                 indexNumber = details.seasonNumber?.toIntOrNull() ?: itemData.indexNumber,
+                premiereDate = details.startDate,
+                productionYear = details.startDate?.year,
+                startDate = details.startDate,
+                endDate = details.endDate,
 
                 // Don't touch these
                 mediaSources = null,
@@ -182,7 +178,14 @@ class JellyfinEntryScreenViewModel(
         val description: String,
         val genre: String,
         val path: String,
+
+        // For season
         val seasonNumber: String?,
+
+        // For series and movies
+        val startDate: DateTime?,
+        val endDate: DateTime?,
+        val status: String?,
     ) {
         companion object {
             fun BaseItemDto.toEntryDetails() = JellyfinEntryDetails(
@@ -193,6 +196,9 @@ class JellyfinEntryScreenViewModel(
                 genre = this.genres.orEmpty().joinToString(),
                 path = this.path ?: "",
                 seasonNumber = (this.indexNumber ?: 0).takeIf { this.type == BaseItemKind.SEASON }?.toString(),
+                startDate = this.startDate,
+                endDate = this.endDate,
+                status = this.status,
             )
 
             val EMPTY = JellyfinEntryDetails(
@@ -203,6 +209,9 @@ class JellyfinEntryScreenViewModel(
                 genre = "",
                 path = "",
                 seasonNumber = null,
+                startDate = null,
+                endDate = null,
+                status = null,
             )
         }
     }
