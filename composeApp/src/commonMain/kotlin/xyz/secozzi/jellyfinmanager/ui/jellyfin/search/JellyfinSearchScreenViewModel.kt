@@ -30,7 +30,7 @@ class JellyfinSearchScreenViewModel(
             try {
                 val searchResult = jellyfinRepository.searchSeries(
                     id = searchRoute.itemId,
-                    searchProvider = JellyfinSearchProvider.AniList.providerName,
+                    searchProvider = searchRoute.searchProvider.providerName,
                     searchQuery = query,
                 )
                 _items.update { _ -> searchResult }
@@ -39,5 +39,10 @@ class JellyfinSearchScreenViewModel(
                 mutableState.update { _ -> UIState.Error(e) }
             }
         }
+    }
+
+    companion object {
+        const val SEARCH_RESULT_KEY = "search_result_key"
+        typealias SEARCH_RESULT_TYPE = Pair<JellyfinSearchProvider, String>?
     }
 }

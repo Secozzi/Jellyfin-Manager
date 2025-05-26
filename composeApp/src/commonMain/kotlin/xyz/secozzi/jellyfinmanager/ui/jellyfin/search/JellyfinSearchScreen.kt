@@ -25,6 +25,7 @@ import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.UUID
 import org.jellyfin.sdk.model.serializer.UUIDSerializer
 import org.koin.compose.viewmodel.koinViewModel
+import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinSearchProvider
 import xyz.secozzi.jellyfinmanager.presentation.jellyfin.search.JellyfinSearchScreenContent
 import xyz.secozzi.jellyfinmanager.presentation.jellyfin.search.components.JellyfinSearchTopBar
 import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreen
@@ -33,7 +34,7 @@ import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
 import xyz.secozzi.jellyfinmanager.presentation.utils.UIState
 import xyz.secozzi.jellyfinmanager.presentation.utils.plus
 import xyz.secozzi.jellyfinmanager.presentation.utils.serializableType
-import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryScreenViewModel.Companion.SEARCH_RESULT_KEY
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.JellyfinSearchScreenViewModel.Companion.SEARCH_RESULT_KEY
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 import xyz.secozzi.jellyfinmanager.utils.Platform
 import xyz.secozzi.jellyfinmanager.utils.platform
@@ -43,6 +44,7 @@ import kotlin.reflect.typeOf
 data class SearchRouteData(
     @Serializable(with = UUIDSerializer::class)
     val itemId: UUID,
+    val searchProvider: JellyfinSearchProvider,
     val searchQuery: String,
 )
 
@@ -58,7 +60,7 @@ data class SearchRoute(
 }
 
 @Composable
-fun JellyfinSearchScreen(searchQuery: String) {
+fun JellyfinSearchScreen(searchQuery: String, searchProvider: JellyfinSearchProvider) {
     val navigator = LocalNavController.current
     val viewModel = koinViewModel<JellyfinSearchScreenViewModel>()
 
@@ -83,7 +85,7 @@ fun JellyfinSearchScreen(searchQuery: String) {
                         navigator.popBackStack()
                         navigator.currentBackStackEntry
                             ?.savedStateHandle
-                            ?.set(SEARCH_RESULT_KEY, selectedId)
+                            ?.set(SEARCH_RESULT_KEY, Pair(searchProvider, selectedId))
                     },
                     enabled = state.isSuccess(),
                     modifier = Modifier

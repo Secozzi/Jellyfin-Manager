@@ -87,6 +87,7 @@ kotlin {
             "-Xcontext-parameters",
             "-Xexpect-actual-classes",
             "-Xmulti-dollar-interpolation",
+            "-Xnested-type-aliases",
             "-opt-in=androidx.compose.material3.ExperimentalMaterial3Api",
         )
     }

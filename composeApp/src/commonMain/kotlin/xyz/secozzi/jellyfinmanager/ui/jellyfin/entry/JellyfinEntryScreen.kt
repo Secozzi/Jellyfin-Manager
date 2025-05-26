@@ -13,7 +13,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CreateNewFolder
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -29,11 +28,17 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavBackStackEntry
+import com.dokar.sonner.Toaster
+import jellyfin_manager.composeapp.generated.resources.Res
+import jellyfin_manager.composeapp.generated.resources.anidb
 import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.UUID
 import org.jellyfin.sdk.model.serializer.UUIDSerializer
+import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
+import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinSearchProvider
 import xyz.secozzi.jellyfinmanager.presentation.components.FabButtonItem
 import xyz.secozzi.jellyfinmanager.presentation.components.FabButtonMain
 import xyz.secozzi.jellyfinmanager.presentation.components.FabButtonState
@@ -45,9 +50,11 @@ import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreen
 import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
 import xyz.secozzi.jellyfinmanager.presentation.utils.serializableType
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinScreenViewModel.JellyfinItemType
-import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryScreenViewModel.Companion.SEARCH_RESULT_KEY
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.JellyfinSearchScreenViewModel.Companion.SEARCH_RESULT_KEY
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.JellyfinSearchScreenViewModel.Companion.SEARCH_RESULT_TYPE
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.SearchRoute
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.SearchRouteData
+import xyz.secozzi.jellyfinmanager.ui.providers.LocalToaster
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 import xyz.secozzi.jellyfinmanager.utils.Platform
 import xyz.secozzi.jellyfinmanager.utils.platform
@@ -79,22 +86,30 @@ fun JellyfinEntryScreen(
     itemId: UUID,
 ) {
     val navigator = LocalNavController.current
+    val toaster = LocalToaster.current
     val viewModel = koinViewModel<JellyfinEntryScreenViewModel>()
 
     val state by viewModel.state.collectAsState()
     val saveState by viewModel.saveState.collectAsState()
     val details by viewModel.details.collectAsState()
+    val toasterEvent by viewModel.toasterEvent.collectAsStateWithLifecycle(null)
 
     val searchResult = backstack.savedStateHandle
-        .getMutableStateFlow<String?>(SEARCH_RESULT_KEY, null)
+        .getMutableStateFlow<SEARCH_RESULT_TYPE>(SEARCH_RESULT_KEY, null)
         .collectAsState()
 
     LaunchedEffect(searchResult) {
         searchResult.value?.let {
             viewModel.onSearch(it)
-            backstack.savedStateHandle.set<String?>(SEARCH_RESULT_KEY, null)
+            backstack.savedStateHandle.set<SEARCH_RESULT_TYPE>(SEARCH_RESULT_KEY, null)
         }
     }
+
+    LaunchedEffect(toasterEvent) {
+        toasterEvent?.let { toaster.show(it) }
+    }
+
+    Toaster(state = toaster)
 
     Scaffold(
         topBar = {
@@ -110,13 +125,31 @@ fun JellyfinEntryScreen(
                 actions = {
                     if (platform == Platform.Desktop) {
                         IconButton(onClick = {
-                            navigator.navigate(SearchRoute(SearchRouteData(itemId, details.title)))
+                            navigator.navigate(
+                                SearchRoute(
+                                    SearchRouteData(
+                                        itemId = itemId,
+                                        searchProvider = JellyfinSearchProvider.Anilist,
+                                        searchQuery = details.title,
+                                    ),
+                                ),
+                            )
                         }) {
                             Icon(Icons.Outlined.Search, null)
                         }
 
-                        IconButton(onClick = {}) {
-                            Icon(Icons.Default.Refresh, null)
+                        IconButton(onClick = {
+                            navigator.navigate(
+                                SearchRoute(
+                                    SearchRouteData(
+                                        itemId = itemId,
+                                        searchProvider = JellyfinSearchProvider.AniDB,
+                                        searchQuery = details.title,
+                                    ),
+                                ),
+                            )
+                        }) {
+                            Icon(vectorResource(Res.drawable.anidb), null)
                         }
                     }
                 },

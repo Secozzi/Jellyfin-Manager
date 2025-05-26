@@ -8,5 +8,6 @@ data class JellyfinSearchResult(
 )
 
 enum class JellyfinSearchProvider(val providerName: String) {
-    AniList("AniList"),
+    Anilist("AniList"),
+    AniDB("AniDB"),
 }

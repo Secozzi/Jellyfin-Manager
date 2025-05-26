@@ -98,8 +98,8 @@ fun Navigator() {
                 JellyfinEntryScreen(it, data.itemType, data.itemId)
             }
             composable<SearchRoute>(typeMap = SearchRoute.typeMap) {
-                val searchQuery = it.toRoute<SearchRoute>().data.searchQuery
-                JellyfinSearchScreen(searchQuery)
+                val data = it.toRoute<SearchRoute>().data
+                JellyfinSearchScreen(data.searchQuery, data.searchProvider)
             }
         }
     }
