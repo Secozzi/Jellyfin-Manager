@@ -73,6 +73,7 @@ class JellyfinEntryScreenViewModel(
             anilistRepository.getDetails(remoteId)?.let {
                 _details.update { details ->
                     details.copy(
+                        anilistId = remoteId,
                         title = it.titles.first(),
                         titleList = it.titles,
                         studio = it.studio.joinToString(),
@@ -125,6 +126,12 @@ class JellyfinEntryScreenViewModel(
         val details = details.value
         val itemData = itemFlow.value!!
 
+        val providers = (itemData.providerIds?.toMutableMap() ?: mutableMapOf()).also {
+            details.anilistId?.let { anilistId ->
+                it[JellyfinSearchProvider.Anilist.providerName] = anilistId.toString()
+            }
+        }
+
         val item = itemData
             .copy(
                 name = details.title,
@@ -141,6 +148,7 @@ class JellyfinEntryScreenViewModel(
                 productionYear = details.startDate?.year,
                 startDate = details.startDate,
                 endDate = details.endDate,
+                providerIds = providers,
 
                 // Don't touch these
                 mediaSources = null,
@@ -225,6 +233,7 @@ class JellyfinEntryScreenViewModel(
         val description: String,
         val genre: String,
         val path: String,
+        val anilistId: Long?,
 
         // For season
         val seasonNumber: String?,
@@ -242,6 +251,7 @@ class JellyfinEntryScreenViewModel(
                 description = this.overview ?: "",
                 genre = this.genres.orEmpty().joinToString(),
                 path = this.path ?: "",
+                anilistId = null,
                 seasonNumber = (this.indexNumber ?: 0).takeIf { this.type == BaseItemKind.SEASON }?.toString(),
                 startDate = this.startDate,
                 endDate = this.endDate,
@@ -255,6 +265,7 @@ class JellyfinEntryScreenViewModel(
                 description = "",
                 genre = "",
                 path = "",
+                anilistId = null,
                 seasonNumber = null,
                 startDate = null,
                 endDate = null,

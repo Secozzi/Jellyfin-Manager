@@ -1,18 +1,13 @@
 package xyz.secozzi.jellyfinmanager.ui.jellyfin.entry
 
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CreateNewFolder
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.outlined.ImageSearch
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,6 +21,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -39,23 +38,21 @@ import org.jellyfin.sdk.model.serializer.UUIDSerializer
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinSearchProvider
-import xyz.secozzi.jellyfinmanager.presentation.components.FabButtonItem
-import xyz.secozzi.jellyfinmanager.presentation.components.FabButtonMain
-import xyz.secozzi.jellyfinmanager.presentation.components.FabButtonState
-import xyz.secozzi.jellyfinmanager.presentation.components.MultiFloatingActionButton
-import xyz.secozzi.jellyfinmanager.presentation.components.rememberMultiFabState
+import xyz.secozzi.jellyfinmanager.presentation.components.FABMenu
 import xyz.secozzi.jellyfinmanager.presentation.jellyfin.entry.JellyfinEntryScreenContent
 import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreen
 import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreen
 import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
+import xyz.secozzi.jellyfinmanager.presentation.utils.bottomBarPadding
 import xyz.secozzi.jellyfinmanager.presentation.utils.serializableType
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinScreenViewModel.JellyfinItemType
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.cover.JellyfinCoverRoute
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.cover.JellyfinCoverRouteData
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.JellyfinSearchScreenViewModel.Companion.SEARCH_RESULT_KEY
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.JellyfinSearchScreenViewModel.Companion.SEARCH_RESULT_TYPE
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.SearchRoute
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.SearchRouteData
 import xyz.secozzi.jellyfinmanager.ui.providers.LocalToaster
-import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 import xyz.secozzi.jellyfinmanager.utils.Platform
 import xyz.secozzi.jellyfinmanager.utils.platform
 import kotlin.reflect.typeOf
@@ -74,7 +71,6 @@ data class JellyfinEntryRoute(
     companion object {
         val typeMap = mapOf(
             typeOf<JellyfinEntryRouteData>() to serializableType<JellyfinEntryRouteData>(),
-            typeOf<JellyfinItemType>() to serializableType<JellyfinItemType>(),
         )
     }
 }
@@ -111,6 +107,20 @@ fun JellyfinEntryScreen(
 
     Toaster(state = toaster)
 
+    val onSearchAnilist = remember {
+        {
+            navigator.navigate(
+                SearchRoute(
+                    SearchRouteData(
+                        itemId = itemId,
+                        searchProvider = JellyfinSearchProvider.Anilist,
+                        searchQuery = details.title,
+                    ),
+                ),
+            )
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -124,17 +134,7 @@ fun JellyfinEntryScreen(
                 },
                 actions = {
                     if (platform == Platform.Desktop) {
-                        IconButton(onClick = {
-                            navigator.navigate(
-                                SearchRoute(
-                                    SearchRouteData(
-                                        itemId = itemId,
-                                        searchProvider = JellyfinSearchProvider.Anilist,
-                                        searchQuery = details.title,
-                                    ),
-                                ),
-                            )
-                        }) {
+                        IconButton(onClick = onSearchAnilist) {
                             Icon(Icons.Outlined.Search, null)
                         }
 
@@ -151,6 +151,18 @@ fun JellyfinEntryScreen(
                         }) {
                             Icon(vectorResource(Res.drawable.anidb), null)
                         }
+
+                        IconButton(onClick = {
+                            navigator.navigate(
+                                JellyfinCoverRoute(
+                                    JellyfinCoverRouteData(
+                                        itemId = itemId,
+                                    ),
+                                ),
+                            )
+                        }) {
+                            Icon(Icons.Outlined.ImageSearch, null)
+                        }
                     }
                 },
             )
@@ -161,9 +173,7 @@ fun JellyfinEntryScreen(
                 enabled = state.isSuccess(),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(WindowInsets.navigationBars.asPaddingValues())
-                    .padding(horizontal = MaterialTheme.spacing.medium)
-                    .padding(bottom = if (platform == Platform.Desktop) MaterialTheme.spacing.small else 0.dp),
+                    .padding(bottomBarPadding()),
             ) {
                 when (saveState) {
                     JellyfinEntryScreenViewModel.SaveState.Idle -> {
@@ -187,31 +197,71 @@ fun JellyfinEntryScreen(
         },
         floatingActionButton = {
             if (platform == Platform.Android) {
-                val fabState = rememberMultiFabState()
+                var fabMenuExpanded by rememberSaveable { mutableStateOf(true) }
 
-                MultiFloatingActionButton(
-                    items = listOf(
-                        FabButtonItem(
-                            iconRes = Icons.Default.CreateNewFolder,
-                            label = "New folder",
-                            key = "add",
-                        ),
-                        FabButtonItem(
-                            iconRes = Icons.Default.Delete,
-                            label = "Delete current",
-                            key = "delete",
-                        ),
-                    ),
-                    fabState = fabState,
-                    onFabItemClicked = { btn ->
-                        navigator.navigate(SearchRoute)
-                        fabState.value = FabButtonState.Collapsed
+                FABMenu(
+                    expanded = fabMenuExpanded,
+                    onExpanded = { fabMenuExpanded = it },
+                    // modifier = Modifier.padding(contentPadding),
+                    onClickButton = {
+                        when (it) {
+                            0 -> onSearchAnilist
+                            1 -> {
+                                navigator.navigate(
+                                    SearchRoute(
+                                        SearchRouteData(
+                                            itemId = itemId,
+                                            searchProvider = JellyfinSearchProvider.AniDB,
+                                            searchQuery = details.title,
+                                        ),
+                                    ),
+                                )
+                            }
+                            2 -> {
+                                navigator.navigate(
+                                    JellyfinCoverRoute(
+                                        JellyfinCoverRouteData(
+                                            itemId = itemId,
+                                        ),
+                                    ),
+                                )
+                            }
+                        }
                     },
-                    fabIcon = FabButtonMain(
-                        iconRes = Icons.Filled.Add,
-                        iconRotate = 45f,
+                    buttons = listOf(
+                        Icons.Outlined.Search to "Search details",
+                        vectorResource(Res.drawable.anidb) to "Retrieve AniDB id",
+                        Icons.Outlined.ImageSearch to "Select images",
                     ),
                 )
+
+                // FloatingActionButtonMenu()
+//
+                // val fabState = rememberMultiFabState()
+//
+                // MultiFloatingActionButton(
+                //     items = listOf(
+                //         FabButtonItem(
+                //             iconRes = Icons.Default.CreateNewFolder,
+                //             label = "New folder",
+                //             key = "add",
+                //         ),
+                //         FabButtonItem(
+                //             iconRes = Icons.Default.Delete,
+                //             label = "Delete current",
+                //             key = "delete",
+                //         ),
+                //     ),
+                //     fabState = fabState,
+                //     onFabItemClicked = { btn ->
+                //         navigator.navigate(SearchRoute)
+                //         fabState.value = FabButtonState.Collapsed
+                //     },
+                //     fabIcon = FabButtonMain(
+                //         iconRes = Icons.Filled.Add,
+                //         iconRotate = 45f,
+                //     ),
+                // )
             }
         },
     ) { contentPadding ->

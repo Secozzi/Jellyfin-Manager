@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -33,18 +33,16 @@ import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import coil3.size.Size
-import org.jetbrains.compose.ui.tooling.preview.Preview
 import xyz.secozzi.jellyfinmanager.presentation.theme.SECONDARY_ALPHA
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 
 @Composable
-fun JellyfinEntryItem(
+private fun CommonJellyfinEntryItem(
     name: String,
-    imageUrl: String?,
     subtitle: String? = null,
     selected: Boolean = false,
-    imageAspectRatio: Float,
     onClick: () -> Unit,
+    content: @Composable () -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -69,19 +67,7 @@ fun JellyfinEntryItem(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalPlatformContext.current)
-                        .data(imageUrl)
-                        .size(Size.ORIGINAL)
-                        .build(),
-                    placeholder = ColorPainter(Color(0x1F888888)),
-                    contentDescription = "",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(imageAspectRatio)
-                        .clip(MaterialTheme.shapes.extraSmall),
-                    contentScale = ContentScale.Crop,
-                )
+                content()
 
                 Text(
                     text = name,
@@ -138,57 +124,60 @@ private fun Modifier.selectedOutline(
 ) = drawBehind { if (isSelected) drawRect(color = color) }
 
 @Composable
-fun EditJellyfinItem(
+fun JellyfinImageItem(
+    name: String,
+    imageUrl: String?,
+    subtitle: String? = null,
+    selected: Boolean = false,
     imageAspectRatio: Float,
     onClick: () -> Unit,
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.extraSmall)
-            .padding(4.dp)
-            .combinedClickable(
-                onClick = onClick,
-            ),
+    CommonJellyfinEntryItem(
+        name = name,
+        subtitle = subtitle,
+        selected = selected,
+        onClick = onClick,
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Box(
-                modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surfaceContainer)
-                    .fillMaxSize()
-                    .aspectRatio(imageAspectRatio)
-                    .clip(MaterialTheme.shapes.extraSmall),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(Icons.Outlined.Edit, null)
-            }
-
-            Text(
-                text = "Edit series",
-                fontSize = 12.sp,
-                lineHeight = 18.sp,
-                minLines = 1,
-                maxLines = 3,
-                style = MaterialTheme.typography.titleSmall,
-                overflow = TextOverflow.Ellipsis,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(MaterialTheme.spacing.extraSmall),
-            )
-        }
+        AsyncImage(
+            model = ImageRequest.Builder(LocalPlatformContext.current)
+                .data(imageUrl)
+                .size(Size.ORIGINAL)
+                .build(),
+            placeholder = ColorPainter(Color(0x1F888888)),
+            contentDescription = "",
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(imageAspectRatio)
+                .clip(MaterialTheme.shapes.extraSmall),
+            contentScale = ContentScale.Crop,
+        )
     }
 }
 
-@Preview
 @Composable
-fun JellyfinEntryItemPreview() {
-    JellyfinEntryItem(
-        name = "One Punch Man",
-        imageUrl = "https://meo.comick.pictures/mndnY6-m.jpg",
-        imageAspectRatio = 2f / 3f,
-        onClick = {},
-    )
+fun JellyfinIconItem(
+    name: String,
+    subtitle: String? = null,
+    icon: ImageVector,
+    imageAspectRatio: Float,
+    selected: Boolean = false,
+    onClick: () -> Unit,
+) {
+    CommonJellyfinEntryItem(
+        name = name,
+        subtitle = subtitle,
+        selected = selected,
+        onClick = onClick,
+    ) {
+        Box(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.surfaceContainer)
+                .fillMaxSize()
+                .aspectRatio(imageAspectRatio)
+                .clip(MaterialTheme.shapes.extraSmall),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(icon, null)
+        }
+    }
 }

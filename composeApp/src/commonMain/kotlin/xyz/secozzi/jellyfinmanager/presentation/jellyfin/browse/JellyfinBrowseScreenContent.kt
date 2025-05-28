@@ -5,12 +5,14 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinItem
-import xyz.secozzi.jellyfinmanager.presentation.jellyfin.components.EditJellyfinItem
-import xyz.secozzi.jellyfinmanager.presentation.jellyfin.components.JellyfinEntryItem
+import xyz.secozzi.jellyfinmanager.presentation.jellyfin.components.JellyfinIconItem
+import xyz.secozzi.jellyfinmanager.presentation.jellyfin.components.JellyfinImageItem
 import xyz.secozzi.jellyfinmanager.presentation.utils.isLandscapeMode
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinScreenViewModel.JellyfinItemList
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
@@ -40,7 +42,9 @@ fun JellyfinBrowseScreen(
     ) {
         if (jellyfinItems is JellyfinItemList.Seasons) {
             item {
-                EditJellyfinItem(
+                JellyfinIconItem(
+                    name = "Edit series",
+                    icon = Icons.Outlined.Edit,
                     imageAspectRatio = aspectRatio,
                     onClick = onClickEditSeries,
                 )
@@ -51,7 +55,7 @@ fun JellyfinBrowseScreen(
             items = jellyfinItems.items,
             key = { it.id },
         ) { item ->
-            JellyfinEntryItem(
+            JellyfinImageItem(
                 name = item.name,
                 imageUrl = item.image.primary?.toString(),
                 imageAspectRatio = aspectRatio,

@@ -10,7 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import kotlinx.collections.immutable.ImmutableList
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinSearchResult
-import xyz.secozzi.jellyfinmanager.presentation.jellyfin.components.JellyfinEntryItem
+import xyz.secozzi.jellyfinmanager.presentation.jellyfin.components.JellyfinImageItem
 import xyz.secozzi.jellyfinmanager.presentation.utils.isLandscapeMode
 import xyz.secozzi.jellyfinmanager.presentation.utils.plus
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
@@ -42,7 +42,7 @@ fun JellyfinSearchScreenContent(
             items = items,
             key = { it.hashCode() },
         ) { item ->
-            JellyfinEntryItem(
+            JellyfinImageItem(
                 name = item.name,
                 subtitle = item.year?.toString(),
                 selected = item.id != null && item.id == selectedId,

@@ -24,6 +24,8 @@ import xyz.secozzi.jellyfinmanager.presentation.theme.AppTheme
 import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
 import xyz.secozzi.jellyfinmanager.ui.home.HomeRoute
 import xyz.secozzi.jellyfinmanager.ui.home.HomeScreen
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.cover.JellyfinCoverRoute
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.cover.JellyfinCoverScreen
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryRoute
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryScreen
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.JellyfinSearchScreen
@@ -100,6 +102,9 @@ fun Navigator() {
             composable<SearchRoute>(typeMap = SearchRoute.typeMap) {
                 val data = it.toRoute<SearchRoute>().data
                 JellyfinSearchScreen(data.searchQuery, data.searchProvider)
+            }
+            composable<JellyfinCoverRoute>(typeMap = JellyfinCoverRoute.typeMap) {
+                JellyfinCoverScreen()
             }
         }
     }

@@ -52,7 +52,11 @@ fun <T, R> combineRefreshable(
 ) { data, _ -> data }
     .onEach { _ -> viewModel.mutableState.update { _ -> UIState.Loading } }
     .mapLatest { data -> runCatching { getResult(data) } }
-    .onEach { result ->
+    .updateState()
+
+context(viewModel: StateViewModel)
+fun <T> Flow<Result<T>>.updateState(): Flow<Result<T>> {
+    return this.onEach { result ->
         viewModel.mutableState.update { _ ->
             if (result.isFailure) {
                 UIState.Error(result.exceptionOrNull()!!)
@@ -61,6 +65,7 @@ fun <T, R> combineRefreshable(
             }
         }
     }
+}
 
 context(viewModel: StateViewModel)
 fun <T> Flow<Result<T>>.asStateFlow(
