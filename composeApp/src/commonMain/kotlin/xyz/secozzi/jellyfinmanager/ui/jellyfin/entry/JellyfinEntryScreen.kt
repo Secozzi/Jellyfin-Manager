@@ -121,6 +121,32 @@ fun JellyfinEntryScreen(
         }
     }
 
+    val onSearchAniDB = remember {
+        {
+            navigator.navigate(
+                SearchRoute(
+                    SearchRouteData(
+                        itemId = itemId,
+                        searchProvider = JellyfinSearchProvider.AniDB,
+                        searchQuery = details.title,
+                    ),
+                ),
+            )
+        }
+    }
+
+    val onClickCover = remember {
+        {
+            navigator.navigate(
+                JellyfinCoverRoute(
+                    JellyfinCoverRouteData(
+                        itemId = itemId,
+                    ),
+                ),
+            )
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -138,29 +164,11 @@ fun JellyfinEntryScreen(
                             Icon(Icons.Outlined.Search, null)
                         }
 
-                        IconButton(onClick = {
-                            navigator.navigate(
-                                SearchRoute(
-                                    SearchRouteData(
-                                        itemId = itemId,
-                                        searchProvider = JellyfinSearchProvider.AniDB,
-                                        searchQuery = details.title,
-                                    ),
-                                ),
-                            )
-                        }) {
+                        IconButton(onClick = onSearchAniDB) {
                             Icon(vectorResource(Res.drawable.anidb), null)
                         }
 
-                        IconButton(onClick = {
-                            navigator.navigate(
-                                JellyfinCoverRoute(
-                                    JellyfinCoverRouteData(
-                                        itemId = itemId,
-                                    ),
-                                ),
-                            )
-                        }) {
+                        IconButton(onClick = onClickCover) {
                             Icon(Icons.Outlined.ImageSearch, null)
                         }
                     }
@@ -202,30 +210,11 @@ fun JellyfinEntryScreen(
                 FABMenu(
                     expanded = fabMenuExpanded,
                     onExpanded = { fabMenuExpanded = it },
-                    // modifier = Modifier.padding(contentPadding),
                     onClickButton = {
                         when (it) {
                             0 -> onSearchAnilist
-                            1 -> {
-                                navigator.navigate(
-                                    SearchRoute(
-                                        SearchRouteData(
-                                            itemId = itemId,
-                                            searchProvider = JellyfinSearchProvider.AniDB,
-                                            searchQuery = details.title,
-                                        ),
-                                    ),
-                                )
-                            }
-                            2 -> {
-                                navigator.navigate(
-                                    JellyfinCoverRoute(
-                                        JellyfinCoverRouteData(
-                                            itemId = itemId,
-                                        ),
-                                    ),
-                                )
-                            }
+                            1 -> onSearchAniDB
+                            2 -> onClickCover
                         }
                     },
                     buttons = listOf(
@@ -234,34 +223,6 @@ fun JellyfinEntryScreen(
                         Icons.Outlined.ImageSearch to "Select images",
                     ),
                 )
-
-                // FloatingActionButtonMenu()
-//
-                // val fabState = rememberMultiFabState()
-//
-                // MultiFloatingActionButton(
-                //     items = listOf(
-                //         FabButtonItem(
-                //             iconRes = Icons.Default.CreateNewFolder,
-                //             label = "New folder",
-                //             key = "add",
-                //         ),
-                //         FabButtonItem(
-                //             iconRes = Icons.Default.Delete,
-                //             label = "Delete current",
-                //             key = "delete",
-                //         ),
-                //     ),
-                //     fabState = fabState,
-                //     onFabItemClicked = { btn ->
-                //         navigator.navigate(SearchRoute)
-                //         fabState.value = FabButtonState.Collapsed
-                //     },
-                //     fabIcon = FabButtonMain(
-                //         iconRes = Icons.Filled.Add,
-                //         iconRotate = 45f,
-                //     ),
-                // )
             }
         },
     ) { contentPadding ->
