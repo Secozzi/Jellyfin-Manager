@@ -40,9 +40,10 @@ import kotlinx.collections.immutable.toPersistentList
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.vectorResource
 import org.koin.compose.viewmodel.koinViewModel
+import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreen
 import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
-import xyz.secozzi.jellyfinmanager.presentation.utils.UIState
+import xyz.secozzi.jellyfinmanager.presentation.utils.UiState
 import xyz.secozzi.jellyfinmanager.ui.home.components.DropDown
 import xyz.secozzi.jellyfinmanager.ui.home.components.NoServerContent
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinRoute
@@ -64,8 +65,8 @@ fun HomeScreen() {
 
     val viewModel = koinViewModel<HomeScreenViewModel>()
     val selectedServer by viewModel.selectedServer.collectAsState()
-    val state by viewModel.state.collectAsState()
     val servers by viewModel.servers.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     val tabs = persistentListOf(
         BottomBarRoute("Jellyfin", JellyfinRoute, vectorResource(Res.drawable.jellyfin)),
@@ -76,7 +77,7 @@ fun HomeScreen() {
         topBar = {
             TopAppBar(
                 title = {
-                    servers.takeIf { it.isNotEmpty() }?.let { serverList ->
+                    servers.takeIf { uiState.isSuccess() && servers.isNotEmpty() }?.let { serverList ->
                         DropDown(
                             server = selectedServer!!,
                             values = serverList.toPersistentList(),
@@ -93,7 +94,7 @@ fun HomeScreen() {
         },
         bottomBar = {
             AnimatedVisibility(
-                visible = state.isSuccess(),
+                visible = uiState.isSuccess(),
                 enter = fadeIn(tween(300)),
                 exit = fadeOut(tween(300)),
             ) {
@@ -129,7 +130,7 @@ fun HomeScreen() {
     ) { contentPadding ->
         HomeScreenContent(
             tabNavigator = tabNavigator,
-            state = state,
+            uiState = uiState,
             paddingValues = contentPadding,
         )
     }
@@ -138,17 +139,17 @@ fun HomeScreen() {
 @Composable
 private fun HomeScreenContent(
     tabNavigator: NavHostController,
-    state: UIState,
+    uiState: UiState<Unit>,
     paddingValues: PaddingValues,
 ) {
     val navigator = LocalNavController.current
 
     Surface(modifier = Modifier.padding(paddingValues)) {
         when {
-            state.isWaiting() -> {
+            uiState.isWaiting() -> {
                 LoadingScreen()
             }
-            state.isError() -> {
+            uiState.isError() -> {
                 NoServerContent(
                     onClick = { navigator.navigate(ServerRoute(null)) },
                 )

@@ -28,7 +28,6 @@ fun ServerListScreen() {
     val navigator = LocalNavController.current
     val viewModel = koinViewModel<ServerListScreenViewModel>()
 
-    val state by viewModel.state.collectAsState()
     val servers by viewModel.servers.collectAsStateWithLifecycle()
     val dialog by viewModel.dialog.collectAsState()
 
@@ -66,7 +65,6 @@ fun ServerListScreen() {
         },
     ) { contentPadding ->
         ServerListScreenContent(
-            state = state,
             servers = servers,
             onClickEdit = {
                 navigator.navigate(ServerRoute(it.id))

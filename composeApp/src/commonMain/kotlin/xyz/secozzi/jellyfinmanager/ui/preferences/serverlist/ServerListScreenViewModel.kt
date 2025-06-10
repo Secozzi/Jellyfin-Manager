@@ -1,5 +1,6 @@
 package xyz.secozzi.jellyfinmanager.ui.preferences.serverlist
 
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -15,23 +16,15 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.usecase.ServerUseCase
-import xyz.secozzi.jellyfinmanager.presentation.utils.StateViewModel
-import xyz.secozzi.jellyfinmanager.presentation.utils.UIState
+import xyz.secozzi.jellyfinmanager.presentation.utils.asResultFlow
 
 class ServerListScreenViewModel(
     private val serverUseCase: ServerUseCase,
-) : StateViewModel() {
+) : ViewModel() {
     private val _dialog = MutableStateFlow<ServerListDialog>(ServerListDialog.None)
     val dialog = _dialog.asStateFlow()
 
-    val servers: StateFlow<List<Server>> = serverUseCase.getServers()
-        .onEach { mutableState.update { _ -> UIState.Success } }
-        .catch { mutableState.update { _ -> UIState.Error(it) } }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000L),
-            initialValue = emptyList(),
-        )
+    val servers = serverUseCase.getServers().asResultFlow { it }
 
     fun moveUp(server: Server) {
         viewModelScope.launch(Dispatchers.IO) {

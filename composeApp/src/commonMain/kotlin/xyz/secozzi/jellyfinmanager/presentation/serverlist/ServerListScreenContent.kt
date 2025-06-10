@@ -22,13 +22,12 @@ import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreen
 import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreen
 import xyz.secozzi.jellyfinmanager.presentation.serverlist.components.ServerListItem
-import xyz.secozzi.jellyfinmanager.presentation.utils.UIState
+import xyz.secozzi.jellyfinmanager.presentation.utils.UiState
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 
 @Composable
 fun ServerListScreenContent(
-    state: UIState,
-    servers: List<Server>,
+    servers: UiState<List<Server>>,
     onClickEdit: (Server) -> Unit,
     onClickDelete: (Server) -> Unit,
     onClickMoveUp: (Server) -> Unit,
@@ -37,20 +36,20 @@ fun ServerListScreenContent(
 ) {
     val lazyListState = rememberLazyListState()
 
-    if (state.isWaiting()) {
+    if (servers.isWaiting()) {
         LoadingScreen(paddingValues)
         return
     }
 
-    if (state.isError()) {
+    if (servers.isError()) {
         ErrorScreen(
-            error = state.getError(),
+            error = servers.getError(),
             paddingValues = paddingValues,
         )
         return
     }
 
-    if (servers.isEmpty()) {
+    if (servers.getData().isEmpty()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -69,7 +68,7 @@ fun ServerListScreenContent(
     }
 
     ServerListContent(
-        serverList = servers,
+        serverList = servers.getData(),
         lazyListState = lazyListState,
         onClickEdit = onClickEdit,
         onClickDelete = onClickDelete,

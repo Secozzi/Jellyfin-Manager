@@ -20,6 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.UUID
@@ -31,7 +32,6 @@ import xyz.secozzi.jellyfinmanager.presentation.jellyfin.search.components.Jelly
 import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreen
 import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreen
 import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
-import xyz.secozzi.jellyfinmanager.presentation.utils.UIState
 import xyz.secozzi.jellyfinmanager.presentation.utils.plus
 import xyz.secozzi.jellyfinmanager.presentation.utils.serializableType
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.JellyfinSearchScreenViewModel.Companion.SEARCH_RESULT_KEY
@@ -64,8 +64,7 @@ fun JellyfinSearchScreen(searchQuery: String, searchProvider: JellyfinSearchProv
     val navigator = LocalNavController.current
     val viewModel = koinViewModel<JellyfinSearchScreenViewModel>()
 
-    val state by viewModel.state.collectAsState()
-    val items by viewModel.items.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val focusRequester = remember { FocusRequester() }
     var selectedId by remember { mutableStateOf<String?>(null) }
 
@@ -103,21 +102,21 @@ fun JellyfinSearchScreen(searchQuery: String, searchProvider: JellyfinSearchProv
             }
         },
     ) { contentPadding ->
-        when (state) {
-            UIState.Idle -> {}
-            UIState.Loading -> {
+        when {
+            state.isWaiting() -> {
                 LoadingScreen(contentPadding)
             }
-            is UIState.Error -> {
+            state.isError() -> {
                 ErrorScreen(
                     error = state.getError(),
                     paddingValues = contentPadding,
                 )
             }
-            UIState.Success -> {
+            state.isSuccess() -> {
+                val items = state.getData().toPersistentList()
                 JellyfinSearchScreenContent(
                     selectedId = selectedId,
-                    items = items.toPersistentList(),
+                    items = items,
                     onClickItem = { selectedId = it },
                     paddingValues = contentPadding,
                 )

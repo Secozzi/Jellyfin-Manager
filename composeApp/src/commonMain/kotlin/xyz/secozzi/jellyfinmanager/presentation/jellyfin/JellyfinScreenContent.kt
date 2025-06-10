@@ -8,13 +8,12 @@ import xyz.secozzi.jellyfinmanager.presentation.jellyfin.browse.JellyfinBrowseSc
 import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreen
 import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreen
 import xyz.secozzi.jellyfinmanager.presentation.ssh.components.PathLevelIndication
-import xyz.secozzi.jellyfinmanager.presentation.utils.UIState
+import xyz.secozzi.jellyfinmanager.presentation.utils.UiState
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinScreenViewModel.JellyfinItemList
 
 @Composable
 fun JellyfinScreenContent(
-    state: UIState,
-    items: Result<JellyfinItemList>,
+    state: UiState<JellyfinItemList>,
     itemPath: List<Pair<String, UUID?>>,
     onNavigateTo: (Int) -> Unit,
     onClickItem: (JellyfinItem) -> Unit,
@@ -38,7 +37,7 @@ fun JellyfinScreenContent(
             return@Column
         }
 
-        val jellyfinItems = items.getOrNull() ?: return@Column
+        val jellyfinItems = state.getData()
         JellyfinBrowseScreen(
             jellyfinItems = jellyfinItems,
             onClickItem = onClickItem,

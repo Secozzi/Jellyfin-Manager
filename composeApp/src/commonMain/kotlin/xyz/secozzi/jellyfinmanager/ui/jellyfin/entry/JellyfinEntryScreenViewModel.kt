@@ -1,6 +1,7 @@
 package xyz.secozzi.jellyfinmanager.ui.jellyfin.entry
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.dokar.sonner.Toast
@@ -19,8 +20,7 @@ import org.jellyfin.sdk.model.api.NameGuidPair
 import xyz.secozzi.jellyfinmanager.domain.anilist.AnilistRepository
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.JellyfinRepository
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinSearchProvider
-import xyz.secozzi.jellyfinmanager.presentation.utils.StateViewModel
-import xyz.secozzi.jellyfinmanager.presentation.utils.executeCatching
+import xyz.secozzi.jellyfinmanager.presentation.utils.UiState
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinScreenViewModel
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryScreenViewModel.JellyfinEntryDetails.Companion.toEntryDetails
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.JellyfinSearchScreenViewModel
@@ -29,10 +29,13 @@ class JellyfinEntryScreenViewModel(
     savedStateHandle: SavedStateHandle,
     private val jellyfinRepository: JellyfinRepository,
     private val anilistRepository: AnilistRepository,
-) : StateViewModel() {
+) : ViewModel() {
     val entryRoute = savedStateHandle.toRoute<JellyfinEntryRoute>(
         typeMap = JellyfinEntryRoute.typeMap,
     )
+
+    private val _state = MutableStateFlow<UiState<Unit>>(UiState.Idle)
+    val state = _state.asStateFlow()
 
     private val _saveState = MutableStateFlow<SaveState>(SaveState.Idle)
     val saveState = _saveState.asStateFlow()
@@ -46,16 +49,22 @@ class JellyfinEntryScreenViewModel(
     private val itemFlow = MutableStateFlow<BaseItemDto?>(null)
 
     init {
-        executeCatching {
-            jellyfinRepository.getItem(entryRoute.data.itemId).let { item ->
-                _details.update { _ -> item.toEntryDetails() }
-                itemFlow.update { _ -> item }
+        _state.update { _ -> UiState.Loading }
+        viewModelScope.launch {
+            try {
+                jellyfinRepository.getItem(entryRoute.data.itemId).let { item ->
+                    _details.update { _ -> item.toEntryDetails() }
+                    itemFlow.update { _ -> item }
 
-                if (entryRoute.data.itemType == JellyfinScreenViewModel.JellyfinItemType.Season) {
-                    getSeasonNumber(item.path ?: "")?.let {
-                        onSeasonNumberChange(it)
+                    if (entryRoute.data.itemType == JellyfinScreenViewModel.JellyfinItemType.Season) {
+                        getSeasonNumber(item.path ?: "")?.let {
+                            onSeasonNumberChange(it)
+                        }
                     }
                 }
+                _state.update { _ -> UiState.Success(Unit) }
+            } catch (e: Exception) {
+                _state.update { _ -> UiState.Error(e) }
             }
         }
     }
@@ -69,21 +78,28 @@ class JellyfinEntryScreenViewModel(
 
     private fun searchAnilist(id: String) {
         val remoteId = id.toLongOrNull() ?: return
-        executeCatching {
-            anilistRepository.getDetails(remoteId)?.let {
-                _details.update { details ->
-                    details.copy(
-                        anilistId = remoteId,
-                        title = it.titles.first(),
-                        titleList = it.titles,
-                        studio = it.studio.joinToString(),
-                        description = it.description ?: details.description,
-                        genre = it.genre.joinToString(),
-                        startDate = it.startDate,
-                        endDate = it.endDate,
-                        status = it.status.jellyfinName,
-                    )
+
+        _state.update { _ -> UiState.Loading }
+        viewModelScope.launch {
+            try {
+                anilistRepository.getDetails(remoteId)?.let {
+                    _details.update { details ->
+                        details.copy(
+                            anilistId = remoteId,
+                            title = it.titles.first(),
+                            titleList = it.titles,
+                            studio = it.studio.joinToString(),
+                            description = it.description ?: details.description,
+                            genre = it.genre.joinToString(),
+                            startDate = it.startDate,
+                            endDate = it.endDate,
+                            status = it.status.jellyfinName,
+                        )
+                    }
                 }
+                _state.update { _ -> UiState.Success(Unit) }
+            } catch (e: Exception) {
+                _state.update { _ -> UiState.Error(e) }
             }
         }
     }

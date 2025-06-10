@@ -1,5 +1,6 @@
 package xyz.secozzi.jellyfinmanager.ui.ssh
 
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dokar.sonner.Toast
 import kotlinx.coroutines.Dispatchers
@@ -19,9 +20,6 @@ import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.server.ServerStateHolder
 import xyz.secozzi.jellyfinmanager.domain.ssh.GetDirectories
 import xyz.secozzi.jellyfinmanager.domain.ssh.model.Directory
-import xyz.secozzi.jellyfinmanager.presentation.utils.StateViewModel
-import xyz.secozzi.jellyfinmanager.presentation.utils.UIState
-import xyz.secozzi.jellyfinmanager.presentation.utils.asStateFlow
 import xyz.secozzi.jellyfinmanager.presentation.utils.combineRefreshable
 
 sealed interface SSHDialogs {
@@ -34,7 +32,7 @@ class SSHScreenViewModel(
     private val getDirectories: GetDirectories,
     private val executeSSH: ExecuteSSH,
     private val serverStateHolder: ServerStateHolder,
-) : StateViewModel() {
+) : ViewModel() {
     private val refreshFlow = MutableSharedFlow<Unit>()
     private val sshClient = MutableStateFlow<SSHClient?>(null)
 
@@ -47,7 +45,7 @@ class SSHScreenViewModel(
     private val _toasterEvent = MutableSharedFlow<Toast>()
     val toasterEvent = _toasterEvent.asSharedFlow()
 
-    val directories = combineRefreshable(
+    val state = combineRefreshable(
         sshData.filter { it.server != null },
         refreshFlow,
     ) { sshData ->
@@ -60,7 +58,7 @@ class SSHScreenViewModel(
             server = sshData.server!!,
             path = sshData.pathList.joinToString(FILE_SEPARATOR),
         )
-    }.asStateFlow()
+    }
 
     init {
         viewModelScope.launch {
@@ -138,7 +136,6 @@ class SSHScreenViewModel(
     private fun executeCommand(commands: List<String>, errorMessage: String) {
         val server = sshData.value.server ?: return
 
-        mutableState.update { _ -> UIState.Loading }
         viewModelScope.launch(Dispatchers.IO) {
             try {
                 executeSSH.invoke(

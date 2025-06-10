@@ -40,15 +40,14 @@ import xyz.secozzi.jellyfinmanager.presentation.components.MaterialPullRefreshIn
 import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreen
 import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreen
 import xyz.secozzi.jellyfinmanager.presentation.ssh.components.PathLevelIndication
-import xyz.secozzi.jellyfinmanager.presentation.utils.UIState
+import xyz.secozzi.jellyfinmanager.presentation.utils.UiState
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 import xyz.secozzi.jellyfinmanager.utils.Platform
 import xyz.secozzi.jellyfinmanager.utils.platform
 
 @Composable
 fun SSHScreenContent(
-    state: UIState,
-    directories: Result<List<Directory>>,
+    state: UiState<List<Directory>>,
     pathList: List<String>,
     ptrState: PullRefreshState,
     onClickDirectory: (Directory) -> Unit,
@@ -99,7 +98,7 @@ fun SSHScreenContent(
                 return@Scaffold
             }
 
-            val directories = directories.getOrNull() ?: return@Scaffold
+            val directories = state.getData()
             PullRefreshLayout(
                 state = ptrState,
                 indicator = { MaterialPullRefreshIndicator(ptrState) },

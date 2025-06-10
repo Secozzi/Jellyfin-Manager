@@ -58,7 +58,6 @@ fun JellyfinCoverScreen() {
 
     val state by viewModel.state.collectAsState()
     val selectedType by viewModel.selectedType.collectAsState()
-    val images by viewModel.images.collectAsStateWithLifecycle()
     val current by viewModel.current.collectAsStateWithLifecycle()
     val toasterEvent by viewModel.toasterEvent.collectAsStateWithLifecycle(null)
 
@@ -88,7 +87,7 @@ fun JellyfinCoverScreen() {
                         if (it == 0) {
                             viewModel.removeImage()
                         } else {
-                            viewModel.uploadImage(images.getOrThrow()[it - 1].url)
+                            viewModel.uploadImage(state.getData()[it - 1].url)
                         }
                     }
                 },
@@ -113,7 +112,6 @@ fun JellyfinCoverScreen() {
         JellyfinCoverScreenContent(
             state = state,
             selectedType = selectedType,
-            images = images,
             current = current,
             selectedImage = selectedImage,
             onSelectImage = { selection ->

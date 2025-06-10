@@ -1,5 +1,6 @@
 package xyz.secozzi.jellyfinmanager.ui.jellyfin
 
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,8 +17,6 @@ import xyz.secozzi.jellyfinmanager.domain.database.models.Server
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.JellyfinRepository
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinItem
 import xyz.secozzi.jellyfinmanager.domain.server.ServerStateHolder
-import xyz.secozzi.jellyfinmanager.presentation.utils.StateViewModel
-import xyz.secozzi.jellyfinmanager.presentation.utils.asStateFlow
 import xyz.secozzi.jellyfinmanager.presentation.utils.combineRefreshable
 
 typealias ItemPath = List<Pair<String, UUID?>>
@@ -25,14 +24,14 @@ typealias ItemPath = List<Pair<String, UUID?>>
 class JellyfinScreenViewModel(
     private val jellyfinRepository: JellyfinRepository,
     private val serverStateHolder: ServerStateHolder,
-) : StateViewModel() {
+) : ViewModel() {
     private val hasInitializedServer = MutableStateFlow(false)
     private val refreshFlow = MutableSharedFlow<Unit>()
 
     private val _jfData = MutableStateFlow<JellyfinVMData>(JellyfinVMData.EMPTY)
     val jfData = _jfData.asStateFlow()
 
-    val items = combineRefreshable(
+    val state = combineRefreshable(
         jfData.filter { it.server != null },
         refreshFlow,
     ) { jfData ->
@@ -42,7 +41,7 @@ class JellyfinScreenViewModel(
         }
 
         getLibraries(jfData.itemPath)
-    }.asStateFlow()
+    }
 
     init {
         viewModelScope.launch {

@@ -22,17 +22,16 @@ import xyz.secozzi.jellyfinmanager.presentation.jellyfin.components.JellyfinIcon
 import xyz.secozzi.jellyfinmanager.presentation.jellyfin.components.JellyfinImageItem
 import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreen
 import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreen
-import xyz.secozzi.jellyfinmanager.presentation.utils.UIState
+import xyz.secozzi.jellyfinmanager.presentation.utils.UiState
 import xyz.secozzi.jellyfinmanager.presentation.utils.isLandscapeMode
 import xyz.secozzi.jellyfinmanager.presentation.utils.plus
 import xyz.secozzi.jellyfinmanager.ui.theme.spacing
 
 @Composable
 fun JellyfinCoverScreenContent(
-    state: UIState,
+    state: UiState<List<JellyfinImageInfo>>,
     selectedType: JellyfinImageType,
-    images: Result<List<JellyfinImageInfo>>,
-    current: Result<Map<JellyfinImageType, String>>,
+    current: UiState<Map<JellyfinImageType, String>>,
     selectedImage: Int?,
     onSelectImage: (Int) -> Unit,
     onSelect: (JellyfinImageType) -> Unit,
@@ -77,8 +76,8 @@ fun JellyfinCoverScreenContent(
             if (selectedType == JellyfinImageType.Primary) GridCells.Fixed(3) else GridCells.Fixed(2)
         }
 
-        val images = images.getOrNull() ?: return@Column
-        val current = current.getOrNull() ?: mapOf()
+        val images = state.getData()
+        val current = current.getDataOrNull() ?: mapOf()
         LazyVerticalGrid(
             columns = columns,
             verticalArrangement = Arrangement.spacedBy(MaterialTheme.spacing.medium),

@@ -1,7 +1,6 @@
 package xyz.secozzi.jellyfinmanager.ui.jellyfin
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.backhandler.BackHandler
@@ -23,9 +22,8 @@ fun JellyfinScreen() {
     val navigator = LocalNavController.current
     val viewModel = koinViewModel<JellyfinScreenViewModel>()
 
-    val state by viewModel.state.collectAsState()
-    val items by viewModel.items.collectAsStateWithLifecycle()
-    val jfData by viewModel.jfData.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val jfData by viewModel.jfData.collectAsStateWithLifecycle()
 
     BackHandler(jfData.itemPath.size > 1) {
         viewModel.onNavigateTo(jfData.itemPath.size - 2)
@@ -33,7 +31,6 @@ fun JellyfinScreen() {
 
     JellyfinScreenContent(
         state = state,
-        items = items,
         itemPath = jfData.itemPath,
         onNavigateTo = viewModel::onNavigateTo,
         onClickItem = {
@@ -58,7 +55,7 @@ fun JellyfinScreen() {
             }
         },
         onClickEditSeries = {
-            val id = (items.getOrThrow() as JellyfinScreenViewModel.JellyfinItemList.Seasons).seriesId
+            val id = (state.getData() as JellyfinScreenViewModel.JellyfinItemList.Seasons).seriesId
 
             navigator.navigate(
                 route = JellyfinEntryRoute(

@@ -31,11 +31,10 @@ fun SSHScreen() {
     val toaster = LocalToaster.current
     val viewModel = koinViewModel<SSHScreenViewModel>()
 
-    val state by viewModel.state.collectAsState()
-    val directories by viewModel.directories.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val toasterEvent by viewModel.toasterEvent.collectAsStateWithLifecycle(null)
-    val dialogShown by viewModel.dialogShown.collectAsState()
-    val sshData by viewModel.sshData.collectAsState()
+    val dialogShown by viewModel.dialogShown.collectAsStateWithLifecycle()
+    val sshData by viewModel.sshData.collectAsStateWithLifecycle()
 
     LaunchedEffect(toasterEvent) {
         toasterEvent?.let { toaster.show(it) }
@@ -88,7 +87,6 @@ fun SSHScreen() {
 
     SSHScreenContent(
         state = state,
-        directories = directories,
         pathList = sshData.pathList,
         ptrState = ptrState,
         onNavigateTo = viewModel::onNavigateTo,

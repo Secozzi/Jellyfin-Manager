@@ -85,9 +85,9 @@ fun JellyfinEntryScreen(
     val toaster = LocalToaster.current
     val viewModel = koinViewModel<JellyfinEntryScreenViewModel>()
 
-    val state by viewModel.state.collectAsState()
-    val saveState by viewModel.saveState.collectAsState()
-    val details by viewModel.details.collectAsState()
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val saveState by viewModel.saveState.collectAsStateWithLifecycle()
+    val details by viewModel.details.collectAsStateWithLifecycle()
     val toasterEvent by viewModel.toasterEvent.collectAsStateWithLifecycle(null)
 
     val searchResult = backstack.savedStateHandle

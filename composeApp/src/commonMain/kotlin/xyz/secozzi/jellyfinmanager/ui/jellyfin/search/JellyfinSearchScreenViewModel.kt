@@ -1,36 +1,33 @@
 package xyz.secozzi.jellyfinmanager.ui.jellyfin.search
 
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.navigation.toRoute
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.JellyfinRepository
 import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinSearchProvider
-import xyz.secozzi.jellyfinmanager.domain.jellyfin.models.JellyfinSearchResult
-import xyz.secozzi.jellyfinmanager.presentation.utils.StateViewModel
-import xyz.secozzi.jellyfinmanager.presentation.utils.executeCatching
+import xyz.secozzi.jellyfinmanager.presentation.utils.asResultFlow
 
 class JellyfinSearchScreenViewModel(
     savedStateHandle: SavedStateHandle,
     private val jellyfinRepository: JellyfinRepository,
-) : StateViewModel() {
+) : ViewModel() {
     val searchRoute = savedStateHandle.toRoute<SearchRoute>(
         typeMap = SearchRoute.typeMap,
     ).data
 
-    private val _items = MutableStateFlow<List<JellyfinSearchResult>>(emptyList())
-    val items = _items.asStateFlow()
+    private val searchFlow = MutableStateFlow("")
+    val state = searchFlow.asResultFlow {
+        jellyfinRepository.searchSeries(
+            id = searchRoute.itemId,
+            searchProvider = searchRoute.searchProvider.providerName,
+            searchQuery = it,
+        )
+    }
 
     fun search(query: String) {
-        executeCatching {
-            val searchResult = jellyfinRepository.searchSeries(
-                id = searchRoute.itemId,
-                searchProvider = searchRoute.searchProvider.providerName,
-                searchQuery = query,
-            )
-            _items.update { _ -> searchResult }
-        }
+        searchFlow.update { _ -> query }
     }
 
     companion object {
