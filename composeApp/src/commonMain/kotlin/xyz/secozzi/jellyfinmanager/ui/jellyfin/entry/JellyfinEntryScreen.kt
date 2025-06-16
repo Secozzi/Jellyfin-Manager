@@ -27,12 +27,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavBackStackEntry
 import com.dokar.sonner.Toaster
 import jellyfin_manager.composeapp.generated.resources.Res
 import jellyfin_manager.composeapp.generated.resources.anidb
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 import org.jellyfin.sdk.model.UUID
 import org.jellyfin.sdk.model.serializer.UUIDSerializer
@@ -45,6 +48,7 @@ import xyz.secozzi.jellyfinmanager.presentation.screen.ErrorScreen
 import xyz.secozzi.jellyfinmanager.presentation.screen.LoadingScreen
 import xyz.secozzi.jellyfinmanager.presentation.utils.LocalNavController
 import xyz.secozzi.jellyfinmanager.presentation.utils.bottomBarPadding
+import xyz.secozzi.jellyfinmanager.presentation.utils.clipEntryOf
 import xyz.secozzi.jellyfinmanager.presentation.utils.serializableType
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinScreenViewModel.JellyfinItemType
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.cover.JellyfinCoverRoute
@@ -85,6 +89,7 @@ fun JellyfinEntryScreen(
     itemId: UUID,
 ) {
     val navigator = LocalNavController.current
+    val clipboard = LocalClipboard.current
     val toaster = LocalToaster.current
     val viewModel = koinViewModel<JellyfinEntryScreenViewModel>()
 
@@ -267,6 +272,13 @@ fun JellyfinEntryScreen(
 
         JellyfinEntryScreenContent(
             details = details,
+            onClickCopy = {
+                viewModel.viewModelScope.launch {
+                    clipboard.setClipEntry(
+                        clipEntryOf(details.path),
+                    )
+                }
+            },
             onTitleChange = viewModel::onTitleChange,
             onStudioChange = viewModel::onStudioChange,
             onDescriptionChange = viewModel::onDescriptionChange,
