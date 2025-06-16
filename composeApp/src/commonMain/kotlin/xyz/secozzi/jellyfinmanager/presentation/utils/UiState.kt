@@ -46,16 +46,16 @@ context(viewModel: ViewModel)
 fun <T, R> Flow<T>.asResultFlow(
     getResult: suspend (T) -> R,
 ): StateFlow<UiState<R>> = this.flatMapLatest { data ->
-        flow {
-            emit(UiState.Loading)
-            try {
-                val result = getResult(data)
-                emit(UiState.Success(result))
-            } catch (e: Exception) {
-                emit(UiState.Error(e))
-            }
+    flow {
+        emit(UiState.Loading)
+        try {
+            val result = getResult(data)
+            emit(UiState.Success(result))
+        } catch (e: Exception) {
+            emit(UiState.Error(e))
         }
     }
+}
     .stateIn(
         scope = viewModel.viewModelScope,
         started = SharingStarted.WhileSubscribed(5.seconds),

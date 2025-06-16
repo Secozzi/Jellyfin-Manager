@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.outlined.ImageSearch
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.VideoLibrary
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -48,6 +49,8 @@ import xyz.secozzi.jellyfinmanager.presentation.utils.serializableType
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinScreenViewModel.JellyfinItemType
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.cover.JellyfinCoverRoute
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.cover.JellyfinCoverRouteData
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.episode.JellyfinEpisodeRoute
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.episode.JellyfinEpisodeRouteData
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.JellyfinSearchScreenViewModel.Companion.SEARCH_RESULT_KEY
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.JellyfinSearchScreenViewModel.Companion.SEARCH_RESULT_TYPE
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.SearchRoute
@@ -147,6 +150,19 @@ fun JellyfinEntryScreen(
         }
     }
 
+    val onClickEpisode = remember {
+        {
+            navigator.navigate(
+                JellyfinEpisodeRoute(
+                    JellyfinEpisodeRouteData(
+                        itemId = itemId,
+                        isSeason = type == JellyfinItemType.Season,
+                    ),
+                ),
+            )
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -170,6 +186,12 @@ fun JellyfinEntryScreen(
 
                         IconButton(onClick = onClickCover) {
                             Icon(Icons.Outlined.ImageSearch, null)
+                        }
+
+                        if (type != JellyfinItemType.Series) {
+                            IconButton(onClick = onClickEpisode) {
+                                Icon(Icons.Outlined.VideoLibrary, null)
+                            }
                         }
                     }
                 },
@@ -205,22 +227,26 @@ fun JellyfinEntryScreen(
         },
         floatingActionButton = {
             if (platform == Platform.Android) {
-                var fabMenuExpanded by rememberSaveable { mutableStateOf(true) }
+                var fabMenuExpanded by rememberSaveable { mutableStateOf(false) }
 
                 FABMenu(
                     expanded = fabMenuExpanded,
                     onExpanded = { fabMenuExpanded = it },
                     onClickButton = {
                         when (it) {
-                            0 -> onSearchAnilist
-                            1 -> onSearchAniDB
-                            2 -> onClickCover
+                            0 -> onSearchAnilist()
+                            1 -> onSearchAniDB()
+                            2 -> onClickCover()
+                            3 -> onClickEpisode()
                         }
                     },
-                    buttons = listOf(
+                    buttons = listOfNotNull(
                         Icons.Outlined.Search to "Search details",
                         vectorResource(Res.drawable.anidb) to "Retrieve AniDB id",
                         Icons.Outlined.ImageSearch to "Select images",
+                        (Icons.Outlined.VideoLibrary to "Episode list").takeUnless {
+                            type == JellyfinItemType.Series
+                        },
                     ),
                 )
             }

@@ -15,6 +15,7 @@ plugins {
 }
 
 private val versionStr = "0.1.0"
+private val appId = "xyz.secozzi.jellyfinmanager"
 
 kotlin {
     androidTarget {
@@ -64,9 +65,10 @@ kotlin {
             implementation(libs.jellyfin.sdk)
             implementation(libs.kmp.uri)
             implementation(libs.sonner)
+            implementation(libs.paths)
+            implementation(libs.okhttp)
             implementation(libs.bundles.coil)
             implementation(libs.bundles.serialization.xml)
-            implementation(libs.bundles.ktor)
 
             api(libs.bundles.datastore)
             api(libs.bundles.koin)
@@ -95,11 +97,11 @@ kotlin {
 }
 
 android {
-    namespace = "xyz.secozzi.jellyfinmanager"
+    namespace = appId
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "xyz.secozzi.jellyfinmanager"
+        applicationId = appId
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
@@ -126,7 +128,7 @@ android {
 sqldelight {
     databases {
         create("JMDatabase") {
-            packageName.set("xyz.secozzi.jellyfinmanager.domain.db")
+            packageName.set("$appId.domain.db")
             schemaOutputDirectory = file("src/commonMain/sqldelight/databases")
             verifyMigrations = true
             verifyDefinitions = true
@@ -154,20 +156,21 @@ dependencies {
 
 compose.desktop {
     application {
-        mainClass = "xyz.secozzi.jellyfinmanager.MainKt"
+        mainClass = "$appId.MainKt"
 
         nativeDistributions {
             targetFormats(TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "xyz.secozzi.jellyfinmanager"
+            packageName = appId
             packageVersion = versionStr
         }
     }
 }
 
 buildkonfig {
-    packageName = "xyz.secozzi.jellyfinmanager"
+    packageName = appId
 
     defaultConfigs {
+        buildConfigField(Type.STRING, "APP_ID", appId, const = true)
         buildConfigField(Type.STRING, "NAME", "Jellyfin Manager", const = true)
         buildConfigField(Type.STRING, "VERSION", versionStr, const = true)
     }

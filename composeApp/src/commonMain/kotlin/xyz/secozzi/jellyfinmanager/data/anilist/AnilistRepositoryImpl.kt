@@ -1,32 +1,33 @@
 package xyz.secozzi.jellyfinmanager.data.anilist
 
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.contentType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.OkHttpClient
 import org.jellyfin.sdk.model.DateTime
 import xyz.secozzi.jellyfinmanager.domain.anilist.AnilistRepository
 import xyz.secozzi.jellyfinmanager.domain.anilist.models.AnilistDetails
 import xyz.secozzi.jellyfinmanager.domain.anilist.models.AnilistStatus
+import xyz.secozzi.jellyfinmanager.utils.parseAs
+import xyz.secozzi.jellyfinmanager.utils.post
+import xyz.secozzi.jellyfinmanager.utils.toRequestBody
 
 class AnilistRepositoryImpl(
-    private val client: HttpClient,
+    private val client: OkHttpClient,
+    private val json: Json,
 ) : AnilistRepository {
     override suspend fun getDetails(id: Long): AnilistDetails? {
         val media = withContext(Dispatchers.IO) {
-            client.post("https://graphql.anilist.co") {
-                contentType(ContentType.Application.Json)
-                setBody(
-                    AnilistDetailsPostData(
+            with(json) {
+                client.post(
+                    url = "https://graphql.anilist.co".toHttpUrl(),
+                    body = AnilistDetailsPostData(
                         query = DETAILS_QUERY,
                         variables = AnilistDetailsVariablesData(id = id),
-                    ),
-                )
-            }.body<AnilistDetailsDto>().data.media
+                    ).toRequestBody(),
+                ).parseAs<AnilistDetailsDto>().data.media
+            }
         } ?: return null
 
         return AnilistDetails(

@@ -6,6 +6,7 @@ import xyz.secozzi.jellyfinmanager.ui.home.HomeScreenViewModel
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.JellyfinScreenViewModel
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.cover.JellyfinCoverScreenViewModel
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryScreenViewModel
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.episode.JellyfinEpisodeScreenViewModel
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.JellyfinSearchScreenViewModel
 import xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.ServerListScreenViewModel
 import xyz.secozzi.jellyfinmanager.ui.preferences.serverlist.server.ServerScreenViewModel
@@ -20,4 +21,5 @@ val ViewModelsModule = module {
     viewModelOf(::JellyfinEntryScreenViewModel)
     viewModelOf(::JellyfinSearchScreenViewModel)
     viewModelOf(::JellyfinCoverScreenViewModel)
+    viewModelOf(::JellyfinEpisodeScreenViewModel)
 }

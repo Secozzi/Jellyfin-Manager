@@ -14,7 +14,7 @@ class ExecuteSSH(
         sshClient: SSHClient?,
         commands: List<String>,
     ): String {
-        val client = if (sshClient?.isConnected == false) {
+        val client = if (sshClient == null || sshClient.isConnected == false) {
             getSSHClient(server)
         } else {
             sshClient
@@ -25,7 +25,7 @@ class ExecuteSSH(
         }
 
         return withContext(Dispatchers.IO) {
-            client?.startSession()?.use { session ->
+            client.startSession()?.use { session ->
                 session.exec(escapedCommand).use { cmd ->
                     String(cmd.inputStream.readBytes())
                 }

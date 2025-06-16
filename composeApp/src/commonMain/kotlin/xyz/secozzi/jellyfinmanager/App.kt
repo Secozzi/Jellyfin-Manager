@@ -28,6 +28,8 @@ import xyz.secozzi.jellyfinmanager.ui.jellyfin.cover.JellyfinCoverRoute
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.cover.JellyfinCoverScreen
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryRoute
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.entry.JellyfinEntryScreen
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.episode.JellyfinEpisodeRoute
+import xyz.secozzi.jellyfinmanager.ui.jellyfin.episode.JellyfinEpisodeScreen
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.JellyfinSearchScreen
 import xyz.secozzi.jellyfinmanager.ui.jellyfin.search.SearchRoute
 import xyz.secozzi.jellyfinmanager.ui.preferences.AppearancePreferencesRoute
@@ -105,6 +107,10 @@ fun Navigator() {
             }
             composable<JellyfinCoverRoute>(typeMap = JellyfinCoverRoute.typeMap) {
                 JellyfinCoverScreen()
+            }
+            composable<JellyfinEpisodeRoute>(typeMap = JellyfinEpisodeRoute.typeMap) {
+                val data = it.toRoute<JellyfinEpisodeRoute>().data
+                JellyfinEpisodeScreen(data.isSeason)
             }
         }
     }
