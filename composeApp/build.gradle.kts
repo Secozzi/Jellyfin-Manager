@@ -74,7 +74,9 @@ kotlin {
             api(libs.bundles.koin)
         }
         desktopMain.dependencies {
-            implementation(libs.sqldelight.desktop)
+            implementation(libs.sqldelight.desktop.get().let { "${it.module}:${it.versionConstraint.requiredVersion}" }) {
+                exclude(group = "org.xerial", module = "sqlite-jdbc")
+            }
             implementation(libs.willena.sqlite.jdbc)
 
             implementation(compose.desktop.currentOs) {
@@ -159,9 +161,17 @@ compose.desktop {
         mainClass = "$appId.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Msi, TargetFormat.Deb)
+            linux {
+                targetFormats(TargetFormat.AppImage)
+            }
+
             packageName = appId
             packageVersion = versionStr
+            includeAllModules = true
+        }
+
+        buildTypes.release.proguard {
+            isEnabled = false
         }
     }
 }

@@ -116,6 +116,8 @@ class JellyfinEntryScreenViewModel(
             providerIds = providers,
 
             // Don't touch these
+            dateCreated = null,
+            dateLastMediaAdded = null,
             mediaSources = null,
             userData = null,
             mediaStreams = null,
@@ -167,6 +169,8 @@ class JellyfinEntryScreenViewModel(
                 providerIds = providers,
 
                 // Don't touch these
+                dateCreated = null,
+                dateLastMediaAdded = null,
                 mediaSources = null,
                 userData = null,
                 mediaStreams = null,
@@ -249,6 +253,7 @@ class JellyfinEntryScreenViewModel(
         val description: String,
         val genre: String,
         val path: String,
+        val providerIds: Map<String, String>,
         val anilistId: Long?,
 
         // For season
@@ -267,6 +272,10 @@ class JellyfinEntryScreenViewModel(
                 description = this.overview ?: "",
                 genre = this.genres.orEmpty().joinToString(),
                 path = this.path ?: "",
+                providerIds = this.providerIds
+                    ?.filterValues { it != null }
+                    ?.mapValues { it.value!! }
+                    ?: emptyMap(),
                 anilistId = null,
                 seasonNumber = (this.indexNumber ?: 0).takeIf { this.type == BaseItemKind.SEASON }?.toString(),
                 startDate = this.startDate,
@@ -281,6 +290,7 @@ class JellyfinEntryScreenViewModel(
                 description = "",
                 genre = "",
                 path = "",
+                providerIds = emptyMap(),
                 anilistId = null,
                 seasonNumber = null,
                 startDate = null,
