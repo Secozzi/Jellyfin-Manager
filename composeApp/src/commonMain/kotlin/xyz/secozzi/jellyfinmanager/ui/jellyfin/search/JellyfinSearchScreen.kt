@@ -72,7 +72,16 @@ fun JellyfinSearchScreen(searchQuery: String, searchProvider: JellyfinSearchProv
             JellyfinSearchTopBar(
                 onBack = { navigator.popBackStack() },
                 searchQuery = searchQuery,
-                onSearch = viewModel::search,
+                onSearch = { query ->
+                    if (query.startsWith("id:")) {
+                        navigator.popBackStack()
+                        navigator.currentBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(SEARCH_RESULT_KEY, Pair(searchProvider, query.substringAfter("id:")))
+                    } else {
+                        viewModel.search(query)
+                    }
+                },
                 focusRequester = focusRequester,
             )
         },
