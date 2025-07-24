@@ -163,6 +163,7 @@ compose.desktop {
         nativeDistributions {
             linux {
                 targetFormats(TargetFormat.AppImage)
+                iconFile.set(project.file("icon.png"))
             }
 
             packageName = appId
