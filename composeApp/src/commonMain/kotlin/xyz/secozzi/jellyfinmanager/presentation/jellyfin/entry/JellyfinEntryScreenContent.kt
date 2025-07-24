@@ -67,7 +67,7 @@ fun JellyfinEntryScreenContent(
 
         Text(
             text = details.providerIds.entries.joinToString(", ") { (k, v) ->
-                "${k}: $v"
+                "$k: $v"
             },
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = DISABLED_ALPHA),
         )
